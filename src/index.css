@@ -1,0 +1,226 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tribely Design System — all tokens HSL. Never use raw colors in components. */
+
+@layer base {
+  :root {
+    /* Brand */
+    --primary: 88 75% 52%;            /* Lime */
+    --primary-foreground: 155 35% 15%;
+    --secondary: 155 35% 15%;         /* Forest */
+    --secondary-foreground: 60 20% 98%;
+    --accent: 14 90% 62%;             /* Coral — spontaneous */
+    --accent-foreground: 0 0% 100%;
+
+    /* Surfaces */
+    --background: 60 20% 98%;
+    --foreground: 155 35% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 155 35% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 155 35% 15%;
+    --muted: 80 15% 94%;
+    --muted-foreground: 155 10% 40%;
+    --border: 80 15% 88%;
+    --input: 80 15% 94%;
+    --ring: 88 75% 52%;
+
+    /* Semantic */
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 145 65% 45%;
+    --warning: 38 92% 55%;
+
+    /* Geometry */
+    --radius: 1.25rem;
+
+    /* 12 Category tints */
+    --cat-running: 14 90% 62%;
+    --cat-football: 215 85% 55%;
+    --cat-gym: 270 70% 60%;
+    --cat-yoga: 170 60% 45%;
+    --cat-cycling: 38 92% 55%;
+    --cat-walking: 195 75% 55%;
+    --cat-tennis: 45 100% 55%;
+    --cat-basketball: 25 85% 55%;
+    --cat-swimming: 200 85% 50%;
+    --cat-climbing: 15 60% 45%;
+    --cat-dance: 325 75% 60%;
+    --cat-other: 155 10% 55%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(88 75% 52%), hsl(155 35% 15%));
+    --gradient-hero: linear-gradient(180deg, transparent, hsl(155 35% 15% / 0.8));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(60 20% 98%));
+
+    /* Shadows */
+    --shadow-soft: 0 2px 8px hsl(155 35% 15% / 0.06);
+    --shadow-float: 0 8px 24px hsl(155 35% 15% / 0.12);
+    --shadow-glow: 0 0 24px hsl(88 75% 52% / 0.4);
+
+    /* Motion */
+    --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Fonts */
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+
+    /* Sidebar (kept for shadcn compatibility) */
+    --sidebar-background: 60 20% 98%;
+    --sidebar-foreground: 155 35% 15%;
+    --sidebar-primary: 88 75% 52%;
+    --sidebar-primary-foreground: 155 35% 15%;
+    --sidebar-accent: 80 15% 94%;
+    --sidebar-accent-foreground: 155 35% 15%;
+    --sidebar-border: 80 15% 88%;
+    --sidebar-ring: 88 75% 52%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 150 25% 7%;
+      --foreground: 60 20% 95%;
+      --card: 150 20% 10%;
+      --card-foreground: 60 20% 95%;
+      --popover: 150 20% 10%;
+      --popover-foreground: 60 20% 95%;
+      --muted: 150 15% 14%;
+      --muted-foreground: 60 10% 65%;
+      --border: 150 15% 18%;
+      --input: 150 15% 14%;
+      --primary: 88 75% 55%;
+      --primary-foreground: 155 35% 15%;
+      --secondary: 60 20% 95%;
+      --secondary-foreground: 155 35% 15%;
+      --ring: 88 75% 55%;
+
+      --gradient-card: linear-gradient(135deg, hsl(150 20% 11%), hsl(150 25% 8%));
+      --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
+      --shadow-float: 0 8px 24px hsl(0 0% 0% / 0.45);
+
+      --sidebar-background: 150 25% 7%;
+      --sidebar-foreground: 60 20% 95%;
+      --sidebar-accent: 150 15% 14%;
+      --sidebar-accent-foreground: 60 20% 95%;
+      --sidebar-border: 150 15% 18%;
+    }
+  }
+
+  /* Manual override class — kept available */
+  .dark {
+    --background: 150 25% 7%;
+    --foreground: 60 20% 95%;
+    --card: 150 20% 10%;
+    --card-foreground: 60 20% 95%;
+    --popover: 150 20% 10%;
+    --popover-foreground: 60 20% 95%;
+    --muted: 150 15% 14%;
+    --muted-foreground: 60 10% 65%;
+    --border: 150 15% 18%;
+    --input: 150 15% 14%;
+    --primary: 88 75% 55%;
+    --primary-foreground: 155 35% 15%;
+    --secondary: 60 20% 95%;
+    --secondary-foreground: 155 35% 15%;
+    --ring: 88 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: var(--font-body);
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-float { box-shadow: var(--shadow-float); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .bg-gradient-primary { background: var(--gradient-primary); }
+  .bg-gradient-card { background: var(--gradient-card); }
+
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 hsl(var(--accent) / 0.6); }
+  70%  { box-shadow: 0 0 0 12px hsl(var(--accent) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tribely map markers (Leaflet DivIcons). */
+.tribely-marker-icon { background: transparent !important; border: 0 !important; }
+
+.tribely-marker-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.tribely-marker {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform .25s var(--ease-smooth);
+}
+.tribely-marker:hover { transform: scale(1.08); }
+
+.tribely-marker-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  background: hsl(var(--accent) / .35);
+  animation: tribely-pulse 1.8s ease-out infinite;
+}
+
+@keyframes tribely-pulse {
+  0%   { transform: scale(0.8); opacity: .8; }
+  70%  { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Hide default leaflet attribution bg in dark mode for clean look */
+.leaflet-container { background: hsl(var(--muted)); font-family: var(--font-body); }
+.leaflet-control-attribution {
+  background: hsl(var(--card) / .85) !important;
+  color: hsl(var(--muted-foreground)) !important;
+  font-size: 10px !important;
+  border-radius: 8px 0 0 0 !important;
+  padding: 2px 6px !important;
+}
+.leaflet-control-attribution a { color: hsl(var(--foreground)) !important; }
