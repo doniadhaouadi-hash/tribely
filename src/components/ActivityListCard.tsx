@@ -14,7 +14,7 @@ export const ActivityListCard = ({ activity, onClick, badge }: Props) => {
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-3 rounded-2xl bg-card shadow-soft p-3 hover:bg-muted/40 transition-colors text-left"
+      className="w-full flex items-center gap-3 rounded-2xl glass shadow-soft p-3 hover:bg-white/20 transition-colors text-left"
     >
       <div
         className="grid place-items-center size-12 rounded-2xl shrink-0 text-xl"

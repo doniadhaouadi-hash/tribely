@@ -185,7 +185,7 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
                 type="submit"
                 disabled={sending || !draft.trim()}
                 aria-label="Send"
-                className="grid place-items-center size-11 rounded-full bg-primary text-primary-foreground shadow-glow disabled:opacity-50 transition-transform hover:scale-105 active:scale-95"
+                className="grid place-items-center size-11 rounded-full bg-gradient-primary text-primary-foreground shadow-glow disabled:opacity-50 transition-transform hover:scale-105 active:scale-95"
               >
                 {sending ? (
                   <Loader2 className="size-4 animate-spin" />

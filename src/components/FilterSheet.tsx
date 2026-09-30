@@ -140,7 +140,7 @@ export const FilterSheet = ({ open, onOpenChange, value, onChange }: Props) => {
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="flex-1 rounded-full bg-primary text-primary-foreground py-3 text-sm font-semibold shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce"
+              className="flex-1 rounded-full bg-gradient-primary text-primary-foreground py-3 text-sm font-semibold shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce"
             >
               Show results
             </button>

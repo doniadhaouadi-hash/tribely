@@ -186,7 +186,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
               </header>
 
               {/* Host */}
-              <section className="rounded-2xl bg-muted/50 border border-border p-3 flex items-center gap-3">
+              <section className="rounded-2xl glass p-3 flex items-center gap-3">
                 <img
                   src={dicebearAvatar(activity.host.avatarSeed)}
                   alt={`${activity.host.displayName} avatar`}
@@ -280,7 +280,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
               {!user ? (
                 <Link
                   to="/auth"
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground py-3.5 text-sm font-semibold shadow-glow"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary text-primary-foreground py-3.5 text-sm font-semibold shadow-glow"
                 >
                   <LogIn className="size-4" aria-hidden /> Sign in to join
                 </Link>
@@ -296,8 +296,8 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
                   className={cn(
                     "w-full inline-flex items-center justify-center gap-2 rounded-full py-3.5 text-sm font-semibold transition-transform ease-bounce hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70",
                     isJoined
-                      ? "bg-muted text-foreground border border-border"
-                      : "bg-primary text-primary-foreground shadow-glow",
+                      ? "glass text-foreground"
+                      : "bg-gradient-primary text-primary-foreground shadow-glow",
                   )}
                 >
                   {acting ? (
@@ -339,8 +339,8 @@ const ActionTile = ({
     onClick={onClick}
     aria-pressed={active}
     className={cn(
-      "rounded-2xl border border-border bg-card hover:bg-muted/60 px-3 py-3 flex flex-col items-center gap-1.5 transition-colors",
-      active && "bg-muted/60",
+      "rounded-2xl glass hover:bg-white/20 px-3 py-3 flex flex-col items-center gap-1.5 transition-colors",
+      active && "bg-white/20",
     )}
   >
     <Icon

@@ -79,7 +79,7 @@ export const MapTab = ({ onOpenActivity }: Props) => {
 
       <div className="absolute top-3 left-0 right-0 z-10 pointer-events-none">
         <div className="px-3 pointer-events-auto">
-          <div className="rounded-full bg-background/90 backdrop-blur-xl border border-border shadow-soft px-2 py-1.5">
+          <div className="rounded-full glass-strong shadow-soft px-2 py-1.5">
             <CategoryFilterRow active={category} onChange={setCategory} />
           </div>
         </div>
@@ -88,7 +88,7 @@ export const MapTab = ({ onOpenActivity }: Props) => {
       <button
         type="button"
         aria-label="Change location"
-        className="absolute top-20 right-3 z-10 grid place-items-center size-11 rounded-full bg-card text-foreground shadow-float border border-border hover:scale-105 active:scale-95 transition-transform ease-bounce"
+        className="absolute top-20 right-3 z-10 grid place-items-center size-11 rounded-full glass-strong text-foreground shadow-float hover:scale-105 active:scale-95 transition-transform ease-bounce"
       >
         <Globe className="size-5" aria-hidden />
       </button>
@@ -97,7 +97,7 @@ export const MapTab = ({ onOpenActivity }: Props) => {
         type="button"
         onClick={handleMyLocation}
         aria-label="Use my location"
-        className="absolute bottom-28 right-3 z-10 grid place-items-center size-11 rounded-full bg-card text-foreground shadow-float border border-border hover:scale-105 active:scale-95 transition-transform ease-bounce"
+        className="absolute bottom-28 right-3 z-10 grid place-items-center size-11 rounded-full glass-strong text-foreground shadow-float hover:scale-105 active:scale-95 transition-transform ease-bounce"
       >
         <LocateFixed className="size-5 text-primary" aria-hidden />
       </button>
