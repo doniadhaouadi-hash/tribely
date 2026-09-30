@@ -64,10 +64,10 @@ export const BottomNavigation = ({ active, onChange }: Props) => {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-4 left-4 right-4 z-40 max-w-md mx-auto rounded-full glass-strong shadow-float mb-[env(safe-area-inset-bottom)]"
       aria-label="Primary"
     >
-      <div className="max-w-md mx-auto grid grid-cols-5 items-end px-4 pt-2 pb-2 relative">
+      <div className="grid grid-cols-5 items-end px-3 pt-2 pb-2 relative">
         {renderTab(discover)}
         {renderTab(map)}
 
@@ -79,9 +79,9 @@ export const BottomNavigation = ({ active, onChange }: Props) => {
             aria-label="Create activity"
             aria-current={active === "create" ? "page" : undefined}
             className={cn(
-              "-translate-y-4 grid place-items-center w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-glow",
+              "-translate-y-5 grid place-items-center w-14 h-14 rounded-full bg-gradient-primary text-primary-foreground shadow-glow ring-4 ring-background",
               "transition-transform duration-300 ease-bounce hover:scale-105 active:scale-95",
-              active === "create" && "ring-4 ring-primary/30",
+              active === "create" && "ring-primary/30",
             )}
           >
             <Plus className="size-7" strokeWidth={2.6} aria-hidden />

@@ -13,13 +13,13 @@ export const StickyHeader = () => {
     "T";
 
   return (
-    <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border">
+    <header className="sticky top-0 z-40 glass rounded-none">
       <div className="max-w-md mx-auto flex items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             aria-label="Change location"
-            className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/70 transition-colors"
+            className="flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-foreground hover:bg-white/20 transition-colors"
           >
             <MapPin className="size-3.5 text-primary" aria-hidden />
             <span className="truncate max-w-[8rem]">
@@ -27,8 +27,8 @@ export const StickyHeader = () => {
             </span>
             <ChevronDown className="size-3.5 text-muted-foreground" aria-hidden />
           </button>
-          <h1 className="font-display text-xl font-bold leading-none">
-            Tribely<span className="text-primary">.</span>
+          <h1 className="font-display text-xl font-bold leading-none text-gradient-primary">
+            Tribely.
           </h1>
         </div>
 
@@ -36,7 +36,7 @@ export const StickyHeader = () => {
           <button
             type="button"
             aria-label="Notifications"
-            className="relative grid place-items-center size-9 rounded-full hover:bg-muted transition-colors"
+            className="relative grid place-items-center size-10 rounded-full glass hover:bg-white/20 transition-colors"
           >
             <Bell className="size-5 text-foreground" aria-hidden />
           </button>
@@ -60,7 +60,7 @@ export const StickyHeader = () => {
           ) : (
             <Link
               to="/auth"
-              className="rounded-full bg-secondary text-secondary-foreground px-4 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
+              className="rounded-full bg-gradient-primary text-primary-foreground px-4 py-1.5 text-sm font-semibold shadow-glow hover:scale-105 transition-transform ease-bounce"
             >
               Sign in
             </Link>

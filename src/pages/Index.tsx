@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { StickyHeader } from "@/components/StickyHeader";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { GlassBackground } from "@/components/GlassBackground";
 import { DiscoverTab } from "@/components/tabs/DiscoverTab";
 import { MapTab } from "@/components/tabs/MapTab";
 import { CreateTab } from "@/components/tabs/CreateTab";
@@ -71,16 +72,19 @@ const Index = () => {
   const isMap = activeTab === "map";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <StickyHeader />
-      <main
-        className={`flex-1 max-w-md w-full mx-auto pb-32 ${isMap ? "px-4 pt-2" : "px-4 pt-2"}`}
-      >
-        <div key={activeTab} className="animate-fade-in">
-          {content}
-        </div>
-      </main>
-      <BottomNavigation active={activeTab} onChange={setActiveTab} />
+    <div className="min-h-screen bg-background flex flex-col relative">
+      <GlassBackground />
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <StickyHeader />
+        <main
+          className={`flex-1 max-w-md w-full mx-auto pb-32 ${isMap ? "px-4 pt-2" : "px-4 pt-2"}`}
+        >
+          <div key={activeTab} className="animate-fade-in">
+            {content}
+          </div>
+        </main>
+        <BottomNavigation active={activeTab} onChange={setActiveTab} />
+      </div>
       <ActivityDetailSheet
         activity={activeActivity}
         onOpenChange={(open) => !open && setActiveActivity(null)}

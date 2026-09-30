@@ -57,10 +57,10 @@ const Pill = ({ isActive, onClick, icon, label, activeStyle }: PillProps) => (
     aria-pressed={isActive}
     style={isActive ? activeStyle : undefined}
     className={cn(
-      "shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-all duration-200",
+      "shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium transition-all duration-200 border border-transparent",
       isActive
-        ? "bg-secondary text-secondary-foreground border-transparent shadow-soft"
-        : "bg-card text-foreground border-border hover:bg-muted",
+        ? "bg-gradient-primary text-primary-foreground shadow-soft"
+        : "glass text-foreground hover:bg-white/20",
     )}
   >
     {icon}

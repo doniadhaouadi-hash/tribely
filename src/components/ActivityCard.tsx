@@ -16,7 +16,7 @@ export const ActivityCard = ({ activity, onClick }: Props) => {
     <button
       type="button"
       onClick={() => onClick?.(activity)}
-      className="group w-full text-left rounded-2xl bg-card shadow-soft overflow-hidden border border-border/60 transition-all duration-300 ease-smooth hover:shadow-float hover:-translate-y-0.5 active:scale-[0.99]"
+      className="group w-full text-left rounded-2xl glass shadow-soft overflow-hidden transition-all duration-300 ease-smooth hover:shadow-float hover:-translate-y-0.5 active:scale-[0.99]"
     >
       {/* Banner — category gradient */}
       <div
