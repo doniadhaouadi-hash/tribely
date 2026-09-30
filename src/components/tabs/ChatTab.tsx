@@ -62,7 +62,7 @@ export const ChatTab = () => {
         </div>
         <Link
           to="/auth"
-          className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-6 py-3 text-sm font-semibold shadow-glow"
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-primary text-primary-foreground px-6 py-3 text-sm font-semibold shadow-glow"
         >
           <LogIn className="size-4" aria-hidden /> Sign in
         </Link>
@@ -105,7 +105,7 @@ export const ChatTab = () => {
               key={a.id}
               type="button"
               onClick={() => setActive(a)}
-              className="w-full flex items-center gap-3 rounded-2xl bg-card shadow-soft p-3 hover:bg-muted/40 transition-colors text-left"
+              className="w-full flex items-center gap-3 rounded-2xl glass shadow-soft p-3 hover:bg-white/20 transition-colors text-left"
             >
               <div
                 className="grid place-items-center size-12 rounded-2xl shrink-0 text-xl"

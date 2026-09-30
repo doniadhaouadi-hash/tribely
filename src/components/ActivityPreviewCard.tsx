@@ -13,7 +13,7 @@ export const ActivityPreviewCard = ({ activity, onOpen, onClose }: Props) => {
   const tint = `hsl(var(${cat.tintVar}))`;
 
   return (
-    <div className="relative rounded-2xl bg-card border border-border shadow-float overflow-hidden">
+    <div className="relative rounded-2xl glass-strong shadow-float overflow-hidden">
       <button
         type="button"
         onClick={onClose}
@@ -71,7 +71,7 @@ export const ActivityPreviewCard = ({ activity, onOpen, onClose }: Props) => {
         <button
           type="button"
           onClick={onOpen}
-          className="w-full rounded-full bg-primary text-primary-foreground py-2.5 text-sm font-semibold shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce"
+          className="w-full rounded-full bg-gradient-primary text-primary-foreground py-2.5 text-sm font-semibold shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce"
         >
           See details
         </button>

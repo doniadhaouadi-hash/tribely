@@ -20,7 +20,7 @@ export const StatChipsRow = ({ stats }: Props) => {
         return (
           <div
             key={i}
-            className="rounded-xl bg-card border border-border shadow-soft px-3 py-2.5 flex flex-col items-start gap-1"
+            className="rounded-xl glass px-3 py-2.5 flex flex-col items-start gap-1"
           >
             <Icon className={`size-4 ${toneCls}`} aria-hidden strokeWidth={2.4} />
             <div className="leading-tight">

@@ -35,7 +35,7 @@ export const SearchBar = ({ value, onChange, placeholder = "Search activities…
         onChange={(e) => setInternal(e.target.value)}
         placeholder={placeholder}
         aria-label="Search activities"
-        className="w-full rounded-full bg-muted text-foreground placeholder:text-muted-foreground pl-10 pr-10 py-3 text-sm border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent transition-shadow"
+        className="w-full rounded-2xl glass text-foreground placeholder:text-muted-foreground pl-10 pr-10 py-3.5 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-shadow"
       />
       {internal.length > 0 && (
         <button

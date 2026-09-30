@@ -5,6 +5,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { GlassBackground } from "@/components/GlassBackground";
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 const passwordSchema = z.string().min(8, "At least 8 characters").max(72);
@@ -89,8 +90,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <header className="max-w-md w-full mx-auto px-4 py-4">
+    <div className="min-h-screen bg-background flex flex-col relative">
+      <GlassBackground />
+      <header className="relative z-10 max-w-md w-full mx-auto px-4 py-4">
         <Link
           to="/"
           aria-label="Back"
@@ -101,15 +103,15 @@ const Auth = () => {
         </Link>
       </header>
 
-      <main className="flex-1 max-w-md w-full mx-auto px-4 pb-12 flex flex-col justify-center gap-8">
+      <main className="relative z-10 flex-1 max-w-md w-full mx-auto px-4 pb-12 flex flex-col justify-center gap-8">
         <div className="text-center space-y-2">
-          <h1 className="font-display text-4xl font-bold leading-tight">
-            Tribely<span className="text-primary">.</span>
+          <h1 className="font-display text-4xl font-bold leading-tight text-gradient-primary">
+            Tribely.
           </h1>
           <p className="text-muted-foreground text-sm">Find your tribe. Move together.</p>
         </div>
 
-        <div className="rounded-2xl bg-card shadow-soft p-6 space-y-5">
+        <div className="rounded-3xl glass-strong shadow-float p-6 space-y-5">
           <div className="grid grid-cols-2 rounded-full bg-muted p-1 text-sm font-medium">
             {(["signin", "signup"] as const).map((m) => (
               <button
@@ -131,7 +133,7 @@ const Auth = () => {
             type="button"
             onClick={handleGoogle}
             disabled={oauthLoading || submitting}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-60"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full glass px-4 py-3 text-sm font-medium text-foreground hover:bg-white/20 transition-colors disabled:opacity-60"
           >
             {oauthLoading ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -177,7 +179,7 @@ const Auth = () => {
             <button
               type="submit"
               disabled={submitting || oauthLoading}
-              className="w-full rounded-full bg-primary text-primary-foreground px-4 py-3 text-sm font-semibold shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce disabled:opacity-60 disabled:hover:scale-100 inline-flex items-center justify-center gap-2"
+              className="w-full rounded-full bg-gradient-primary text-primary-foreground px-4 py-3 text-sm font-semibold shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce disabled:opacity-60 disabled:hover:scale-100 inline-flex items-center justify-center gap-2"
             >
               {submitting && <Loader2 className="size-4 animate-spin" aria-hidden />}
               {mode === "signin" ? "Sign in" : "Create account"}
@@ -217,7 +219,7 @@ const Field = ({
       placeholder={placeholder}
       autoComplete={autoComplete}
       required
-      className="w-full rounded-full border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+      className="w-full rounded-full glass px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
     />
   </label>
 );

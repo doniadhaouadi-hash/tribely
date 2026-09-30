@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
 
 @tailwind base;
@@ -9,26 +9,33 @@
 
 @layer base {
   :root {
-    /* Brand */
-    --primary: 88 75% 52%;            /* Lime */
-    --primary-foreground: 155 35% 15%;
-    --secondary: 155 35% 15%;         /* Forest */
-    --secondary-foreground: 60 20% 98%;
-    --accent: 14 90% 62%;             /* Coral — spontaneous */
+    /* Brand — Glassmorphic Premium */
+    --primary: 247 87% 73%;           /* Violet */
+    --primary-foreground: 240 25% 14%;
+    --secondary: 240 22% 14%;         /* Ink navy */
+    --secondary-foreground: 225 50% 97%;
+    --accent: 173 76% 32%;            /* Deep teal — spontaneous / rating */
     --accent-foreground: 0 0% 100%;
 
     /* Surfaces */
-    --background: 60 20% 98%;
-    --foreground: 155 35% 15%;
+    --background: 225 50% 97%;
+    --foreground: 240 25% 14%;
     --card: 0 0% 100%;
-    --card-foreground: 155 35% 15%;
+    --card-foreground: 240 25% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 155 35% 15%;
-    --muted: 80 15% 94%;
-    --muted-foreground: 155 10% 40%;
-    --border: 80 15% 88%;
-    --input: 80 15% 94%;
-    --ring: 88 75% 52%;
+    --popover-foreground: 240 25% 14%;
+    --muted: 225 30% 93%;
+    --muted-foreground: 235 12% 42%;
+    --border: 225 25% 88%;
+    --input: 225 25% 93%;
+    --ring: 247 87% 73%;
+
+    /* Glass — translucent surfaces (use with hsl(var(--glass) / alpha)) */
+    --glass: 0 0% 100%;
+    --glass-border: 0 0% 100%;
+    --blob-1: 247 87% 73%;             /* violet */
+    --blob-2: 171 77% 64%;             /* pastel teal */
+    --blob-3: 330 100% 81%;            /* soft pink */
 
     /* Semantic */
     --destructive: 0 75% 55%;
@@ -37,7 +44,7 @@
     --warning: 38 92% 55%;
 
     /* Geometry */
-    --radius: 1.25rem;
+    --radius: 1.5rem;
 
     /* 12 Category tints */
     --cat-running: 14 90% 62%;
@@ -54,81 +61,93 @@
     --cat-other: 155 10% 55%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(88 75% 52%), hsl(155 35% 15%));
-    --gradient-hero: linear-gradient(180deg, transparent, hsl(155 35% 15% / 0.8));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(60 20% 98%));
+    --gradient-primary: linear-gradient(135deg, hsl(247 87% 73%), hsl(171 77% 64%));
+    --gradient-hero: linear-gradient(180deg, transparent, hsl(240 25% 12% / 0.8));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(225 50% 97%));
 
     /* Shadows */
-    --shadow-soft: 0 2px 8px hsl(155 35% 15% / 0.06);
-    --shadow-float: 0 8px 24px hsl(155 35% 15% / 0.12);
-    --shadow-glow: 0 0 24px hsl(88 75% 52% / 0.4);
+    --shadow-soft: 0 2px 8px hsl(240 25% 12% / 0.06);
+    --shadow-float: 0 8px 24px hsl(240 25% 12% / 0.12);
+    --shadow-glow: 0 0 24px hsl(247 87% 73% / 0.45);
 
     /* Motion */
     --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
     --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     /* Fonts */
-    --font-display: 'Space Grotesk', system-ui, sans-serif;
-    --font-body: 'Inter', system-ui, sans-serif;
+    --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
 
     /* Sidebar (kept for shadcn compatibility) */
-    --sidebar-background: 60 20% 98%;
-    --sidebar-foreground: 155 35% 15%;
-    --sidebar-primary: 88 75% 52%;
-    --sidebar-primary-foreground: 155 35% 15%;
-    --sidebar-accent: 80 15% 94%;
-    --sidebar-accent-foreground: 155 35% 15%;
-    --sidebar-border: 80 15% 88%;
-    --sidebar-ring: 88 75% 52%;
+    --sidebar-background: 225 50% 97%;
+    --sidebar-foreground: 240 25% 14%;
+    --sidebar-primary: 247 87% 73%;
+    --sidebar-primary-foreground: 240 25% 14%;
+    --sidebar-accent: 225 30% 93%;
+    --sidebar-accent-foreground: 240 25% 14%;
+    --sidebar-border: 225 25% 88%;
+    --sidebar-ring: 247 87% 73%;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --background: 150 25% 7%;
-      --foreground: 60 20% 95%;
-      --card: 150 20% 10%;
-      --card-foreground: 60 20% 95%;
-      --popover: 150 20% 10%;
-      --popover-foreground: 60 20% 95%;
-      --muted: 150 15% 14%;
-      --muted-foreground: 60 10% 65%;
-      --border: 150 15% 18%;
-      --input: 150 15% 14%;
-      --primary: 88 75% 55%;
-      --primary-foreground: 155 35% 15%;
-      --secondary: 60 20% 95%;
-      --secondary-foreground: 155 35% 15%;
-      --ring: 88 75% 55%;
+      --background: 240 30% 8%;
+      --foreground: 230 40% 95%;
+      --card: 240 22% 11%;
+      --card-foreground: 230 40% 95%;
+      --popover: 240 22% 11%;
+      --popover-foreground: 230 40% 95%;
+      --muted: 240 18% 16%;
+      --muted-foreground: 230 15% 65%;
+      --border: 240 18% 20%;
+      --input: 240 18% 16%;
+      --primary: 247 90% 76%;
+      --primary-foreground: 240 25% 14%;
+      --secondary: 230 40% 92%;
+      --secondary-foreground: 240 25% 14%;
+      --accent: 171 65% 48%;
+      --accent-foreground: 240 25% 12%;
+      --ring: 247 90% 76%;
 
-      --gradient-card: linear-gradient(135deg, hsl(150 20% 11%), hsl(150 25% 8%));
+      --glass: 240 22% 16%;
+      --glass-border: 230 25% 55%;
+
+      --gradient-card: linear-gradient(135deg, hsl(240 22% 12%), hsl(240 30% 9%));
+      --gradient-hero: linear-gradient(180deg, transparent, hsl(240 30% 6% / 0.85));
       --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
       --shadow-float: 0 8px 24px hsl(0 0% 0% / 0.45);
+      --shadow-glow: 0 0 24px hsl(247 90% 76% / 0.4);
 
-      --sidebar-background: 150 25% 7%;
-      --sidebar-foreground: 60 20% 95%;
-      --sidebar-accent: 150 15% 14%;
-      --sidebar-accent-foreground: 60 20% 95%;
-      --sidebar-border: 150 15% 18%;
+      --sidebar-background: 240 30% 8%;
+      --sidebar-foreground: 230 40% 95%;
+      --sidebar-accent: 240 18% 16%;
+      --sidebar-accent-foreground: 230 40% 95%;
+      --sidebar-border: 240 18% 20%;
     }
   }
 
   /* Manual override class — kept available */
   .dark {
-    --background: 150 25% 7%;
-    --foreground: 60 20% 95%;
-    --card: 150 20% 10%;
-    --card-foreground: 60 20% 95%;
-    --popover: 150 20% 10%;
-    --popover-foreground: 60 20% 95%;
-    --muted: 150 15% 14%;
-    --muted-foreground: 60 10% 65%;
-    --border: 150 15% 18%;
-    --input: 150 15% 14%;
-    --primary: 88 75% 55%;
-    --primary-foreground: 155 35% 15%;
-    --secondary: 60 20% 95%;
-    --secondary-foreground: 155 35% 15%;
-    --ring: 88 75% 55%;
+    --background: 240 30% 8%;
+    --foreground: 230 40% 95%;
+    --card: 240 22% 11%;
+    --card-foreground: 230 40% 95%;
+    --popover: 240 22% 11%;
+    --popover-foreground: 230 40% 95%;
+    --muted: 240 18% 16%;
+    --muted-foreground: 230 15% 65%;
+    --border: 240 18% 20%;
+    --input: 240 18% 16%;
+    --primary: 247 90% 76%;
+    --primary-foreground: 240 25% 14%;
+    --secondary: 230 40% 92%;
+    --secondary-foreground: 240 25% 14%;
+    --accent: 171 65% 48%;
+    --accent-foreground: 240 25% 12%;
+    --ring: 247 90% 76%;
+
+    --glass: 240 22% 16%;
+    --glass-border: 230 25% 55%;
   }
 }
 
@@ -158,8 +177,73 @@
   .bg-gradient-primary { background: var(--gradient-primary); }
   .bg-gradient-card { background: var(--gradient-card); }
 
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Glassmorphic surfaces */
+  .glass {
+    background: hsl(var(--glass) / 0.55);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid hsl(var(--glass-border) / 0.55);
+  }
+  .glass-strong {
+    background: hsl(var(--glass) / 0.7);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid hsl(var(--glass-border) / 0.65);
+  }
+
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+/* Decorative blurred gradient blobs behind glass surfaces */
+.glass-backdrop {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.glass-backdrop::before,
+.glass-backdrop::after,
+.glass-backdrop span {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(50px);
+}
+.glass-backdrop::before {
+  top: -10%;
+  left: -12%;
+  width: 60vw;
+  height: 60vw;
+  max-width: 420px;
+  max-height: 420px;
+  background: radial-gradient(circle, hsl(var(--blob-1) / 0.35), hsl(var(--blob-1) / 0) 70%);
+}
+.glass-backdrop::after {
+  top: 18%;
+  right: -14%;
+  width: 55vw;
+  height: 55vw;
+  max-width: 380px;
+  max-height: 380px;
+  background: radial-gradient(circle, hsl(var(--blob-2) / 0.32), hsl(var(--blob-2) / 0) 70%);
+}
+.glass-backdrop span {
+  bottom: -12%;
+  left: 10%;
+  width: 50vw;
+  height: 50vw;
+  max-width: 320px;
+  max-height: 320px;
+  background: radial-gradient(circle, hsl(var(--blob-3) / 0.28), hsl(var(--blob-3) / 0) 70%);
 }
 
 @keyframes pulse-ring {

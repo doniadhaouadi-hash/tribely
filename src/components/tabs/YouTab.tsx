@@ -134,8 +134,8 @@ export const YouTab = () => {
     <>
       <div className="space-y-6 pt-2">
         {/* Profile header */}
-        <section className="rounded-2xl bg-card shadow-soft p-5 flex items-center gap-4">
-          <div className="grid place-items-center size-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl overflow-hidden shrink-0">
+        <section className="rounded-2xl glass-strong shadow-soft p-5 flex items-center gap-4">
+          <div className="grid place-items-center size-16 rounded-full bg-gradient-primary text-primary-foreground font-bold text-2xl overflow-hidden shrink-0">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="" className="size-full object-cover" />
             ) : (
@@ -158,7 +158,7 @@ export const YouTab = () => {
           <button
             type="button"
             onClick={() => setShowOnboarding(true)}
-            className="w-full rounded-2xl bg-primary text-primary-foreground p-4 flex items-center gap-3 text-left shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce"
+            className="w-full rounded-2xl bg-gradient-primary text-primary-foreground p-4 flex items-center gap-3 text-left shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce"
           >
             <div className="grid place-items-center size-10 rounded-full bg-primary-foreground/15 shrink-0">
               <Sparkles className="size-5" aria-hidden />
@@ -227,7 +227,7 @@ export const YouTab = () => {
         <button
           type="button"
           onClick={handleSignOut}
-          className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-full glass px-4 py-3 text-sm font-medium text-foreground hover:bg-white/20 transition-colors"
         >
           <LogOut className="size-4" aria-hidden />
           Sign out
@@ -255,7 +255,7 @@ const Stat = ({
   label: string;
   value: string | number;
 }) => (
-  <div className="rounded-2xl bg-card shadow-soft p-3 flex flex-col items-center gap-1">
+  <div className="rounded-2xl glass shadow-soft p-3 flex flex-col items-center gap-1">
     <Icon className="size-4 text-primary" aria-hidden />
     <span className="font-display text-lg font-bold leading-none">{value}</span>
     <span className="text-[11px] text-muted-foreground">{label}</span>

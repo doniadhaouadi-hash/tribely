@@ -17,7 +17,7 @@ export const SpontaneousHeroCard = ({ activity, onClick }: Props) => {
       className="relative w-full text-left rounded-2xl overflow-hidden p-5 shadow-float transition-transform duration-300 ease-smooth hover:-translate-y-0.5"
       style={{
         background:
-          "linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(14 90% 50%) 70%, hsl(var(--secondary)) 130%)",
+          "linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(330 75% 48%) 70%, hsl(var(--secondary)) 130%)",
       }}
     >
       <div className="flex items-start justify-between gap-3">

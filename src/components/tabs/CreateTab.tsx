@@ -123,7 +123,7 @@ export const CreateTab = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5 pt-1 pb-4">
       <header className="space-y-1">
-        <div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-[11px] font-medium text-muted-foreground">
+        <div className="inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-[11px] font-medium text-muted-foreground">
           <Plus className="size-3.5 text-primary" aria-hidden /> Host an activity
         </div>
         <h2 className="font-display text-2xl font-bold leading-tight">
@@ -149,7 +149,7 @@ export const CreateTab = () => {
                   type="button"
                   onClick={() => setCategory(key)}
                   aria-pressed={isActive}
-                  className="shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-all duration-200 bg-card text-foreground border-border hover:bg-muted aria-pressed:border-transparent aria-pressed:shadow-soft"
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-all duration-200 glass text-foreground hover:bg-white/20 aria-pressed:border-transparent aria-pressed:shadow-soft"
                   style={
                     isActive
                       ? {
@@ -176,7 +176,7 @@ export const CreateTab = () => {
           placeholder="Morning run am Main"
           required
           maxLength={80}
-          className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </Field>
 
@@ -187,7 +187,7 @@ export const CreateTab = () => {
           placeholder="Eiserner Steg, Frankfurt"
           required
           maxLength={120}
-          className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </Field>
 
@@ -198,7 +198,7 @@ export const CreateTab = () => {
             value={startAt}
             onChange={(e) => setStartAt(e.target.value)}
             required
-            className="w-full rounded-2xl border border-border bg-card px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-2xl glass px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </Field>
         <Field label="Duration (min)">
@@ -210,7 +210,7 @@ export const CreateTab = () => {
             value={duration}
             onChange={(e) => setDuration(Number(e.target.value))}
             required
-            className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </Field>
       </div>
@@ -223,7 +223,7 @@ export const CreateTab = () => {
           value={maxParticipants}
           onChange={(e) => setMaxParticipants(Number(e.target.value))}
           required
-          className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </Field>
 
@@ -234,7 +234,7 @@ export const CreateTab = () => {
           placeholder="What to bring, vibe, pace, etc."
           maxLength={500}
           rows={3}
-          className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+          className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
         />
       </Field>
 
@@ -245,7 +245,7 @@ export const CreateTab = () => {
         className={`w-full inline-flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-sm transition-colors ${
           spontaneous
             ? "border-accent bg-accent/10"
-            : "border-border bg-card hover:bg-muted"
+            : "border-transparent glass hover:bg-white/20"
         }`}
       >
         <span className="inline-flex items-center gap-2">
@@ -260,7 +260,7 @@ export const CreateTab = () => {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground py-3.5 text-sm font-semibold shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce disabled:opacity-60 disabled:hover:scale-100"
+        className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary text-primary-foreground py-3.5 text-sm font-semibold shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce disabled:opacity-60 disabled:hover:scale-100"
       >
         {submitting && <Loader2 className="size-4 animate-spin" aria-hidden />}
         Create activity

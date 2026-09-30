@@ -231,7 +231,7 @@ export const OnboardingSheet = ({ open, onClose }: Props) => {
               type="button"
               onClick={handleNext}
               disabled={saving}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground py-3.5 text-sm font-semibold shadow-glow disabled:opacity-70 hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary text-primary-foreground py-3.5 text-sm font-semibold shadow-glow disabled:opacity-70 hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce"
             >
               {saving ? (
                 <Loader2 className="size-4 animate-spin" />
