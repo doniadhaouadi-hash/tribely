@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchActivitiesWithHosts } from "@/lib/activitiesApi";
+import { errorMessage } from "@/lib/errors";
 import type { MockActivity } from "@/data/activities";
 
 export const useActivities = () => {
@@ -10,15 +11,21 @@ export const useActivities = () => {
 
   const refresh = useCallback(async () => {
     try {
-      setError(null);
       const data = await fetchActivitiesWithHosts();
       setActivities(data);
+      setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load activities");
+      setError(errorMessage(e, "Failed to load activities"));
     } finally {
       setLoading(false);
     }
   }, []);
+
+  /** User-triggered reload after an error: shows the spinner again. */
+  const retry = useCallback(() => {
+    setLoading(true);
+    return refresh();
+  }, [refresh]);
 
   useEffect(() => {
     refresh();
@@ -44,5 +51,5 @@ export const useActivities = () => {
     };
   }, [refresh]);
 
-  return { activities, loading, error, refresh };
+  return { activities, loading, error, refresh, retry };
 };

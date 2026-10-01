@@ -9,6 +9,7 @@ import { CategoryFilterRow } from "@/components/CategoryFilterRow";
 import { StatChipsRow } from "@/components/StatChipsRow";
 import { ActivityCard } from "@/components/ActivityCard";
 import { SpontaneousHeroCard } from "@/components/SpontaneousHeroCard";
+import { LoadError } from "@/components/LoadError";
 import {
   DEFAULT_FILTERS,
   FilterSheet,
@@ -26,7 +27,7 @@ type Props = {
 export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Props) => {
   const { city } = useLocation();
   const { profile } = useAuth();
-  const { activities, loading } = useActivities();
+  const { activities, loading, error, retry } = useActivities();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryKey | "all">("all");
   const [filters, setFilters] = useState<DiscoverFilters>(DEFAULT_FILTERS);
@@ -144,6 +145,8 @@ export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Prop
           <div className="py-12 grid place-items-center text-muted-foreground">
             <Loader2 className="size-6 animate-spin" aria-hidden />
           </div>
+        ) : error && activities.length === 0 ? (
+          <LoadError message={error} onRetry={retry} />
         ) : upcoming.length === 0 ? (
           <EmptyState category={category} onHostClick={onHostClick} />
         ) : (

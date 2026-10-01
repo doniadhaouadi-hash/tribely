@@ -9,6 +9,7 @@ import { reverseGeocodeCity } from "@/lib/geocode";
 import { CategoryFilterRow } from "@/components/CategoryFilterRow";
 import { createCategoryMarker } from "@/lib/mapMarker";
 import { ActivityPreviewCard } from "@/components/ActivityPreviewCard";
+import { LoadError } from "@/components/LoadError";
 
 type Props = {
   onOpenActivity?: (a: MockActivity) => void;
@@ -24,7 +25,7 @@ const RecenterOnCity = ({ lat, lng }: { lat: number; lng: number }) => {
 
 export const MapTab = ({ onOpenActivity }: Props) => {
   const { city, setCity, openPicker } = useLocation();
-  const { activities } = useActivities();
+  const { activities, error, retry } = useActivities();
   const [category, setCategory] = useState<CategoryKey | "all">("all");
   const [selected, setSelected] = useState<MockActivity | null>(null);
   const [locating, setLocating] = useState(false);
@@ -134,6 +135,12 @@ export const MapTab = ({ onOpenActivity }: Props) => {
           <LocateFixed className="size-5 text-primary" aria-hidden />
         )}
       </button>
+
+      {error && activities.length === 0 && (
+        <div className="absolute top-36 left-3 right-3 z-10">
+          <LoadError message={error} onRetry={retry} />
+        </div>
+      )}
 
       {selected && (
         <div className="absolute bottom-3 left-3 right-3 z-10 animate-slide-up">

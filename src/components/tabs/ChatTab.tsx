@@ -7,12 +7,16 @@ import { CATEGORIES, type MockActivity } from "@/data/activities";
 import { ChatSheet } from "@/components/ChatSheet";
 import { formatActivityTime } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
+import { LoadError } from "@/components/LoadError";
+import { errorMessage } from "@/lib/errors";
 
 export const ChatTab = () => {
   const { user } = useAuth();
   const [chats, setChats] = useState<MockActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState<MockActivity | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -27,7 +31,12 @@ export const ChatTab = () => {
         const { upcoming, hosted } = await fetchMyActivities(user.id);
         const map = new Map<string, MockActivity>();
         [...hosted, ...upcoming].forEach((a) => map.set(a.id, a));
-        if (!cancelled) setChats(Array.from(map.values()));
+        if (!cancelled) {
+          setChats(Array.from(map.values()));
+          setError(null);
+        }
+      } catch (e) {
+        if (!cancelled) setError(errorMessage(e, "Failed to load chats"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -46,7 +55,7 @@ export const ChatTab = () => {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, reloadKey]);
 
   if (!user) {
     return (
@@ -75,6 +84,17 @@ export const ChatTab = () => {
       <div className="pt-16 grid place-items-center text-muted-foreground">
         <Loader2 className="size-5 animate-spin" />
       </div>
+    );
+  }
+
+  if (error && chats.length === 0) {
+    return (
+      <LoadError
+        className="mt-6"
+        title="Couldn't load your chats"
+        message={error}
+        onRetry={() => setReloadKey((k) => k + 1)}
+      />
     );
   }
 

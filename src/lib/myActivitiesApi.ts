@@ -23,28 +23,31 @@ export const fetchMyActivities = async (userId: string): Promise<MyActivitiesBuc
   const nowIso = new Date().toISOString();
 
   // 1. Hosted
-  const { data: hostedRows } = await supabase
+  const { data: hostedRows, error: hostedError } = await supabase
     .from("activities")
     .select("*")
     .eq("host_id", userId)
     .neq("status", "cancelled")
     .order("start_at", { ascending: true });
+  if (hostedError) throw hostedError;
 
   // 2. Joined (going)
-  const { data: parts } = await supabase
+  const { data: parts, error: partsError } = await supabase
     .from("activity_participants")
     .select("activity_id")
     .eq("user_id", userId)
     .eq("status", "going");
+  if (partsError) throw partsError;
 
   const joinedIds = (parts ?? []).map((p) => p.activity_id);
   let joinedRows: any[] = [];
   if (joinedIds.length) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("activities")
       .select("*")
       .in("id", joinedIds)
       .neq("status", "cancelled");
+    if (error) throw error;
     joinedRows = data ?? [];
   }
 
@@ -69,17 +72,19 @@ export const fetchMyActivities = async (userId: string): Promise<MyActivitiesBuc
 };
 
 export const fetchFavoriteActivities = async (userId: string): Promise<MockActivity[]> => {
-  const { data: favs } = await supabase
+  const { data: favs, error: favsError } = await supabase
     .from("favorites")
     .select("activity_id")
     .eq("user_id", userId);
+  if (favsError) throw favsError;
   const ids = (favs ?? []).map((f) => f.activity_id);
   if (!ids.length) return [];
-  const { data: rows } = await supabase
+  const { data: rows, error: rowsError } = await supabase
     .from("activities")
     .select("*")
     .in("id", ids)
     .neq("status", "cancelled")
     .order("start_at", { ascending: true });
+  if (rowsError) throw rowsError;
   return enrichWithHosts(rows ?? []);
 };

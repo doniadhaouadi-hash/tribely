@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadImage, UploadError } from "@/lib/uploadImage";
 import type { MockActivity } from "@/data/activities";
 import { cn } from "@/lib/utils";
+import { errorMessage } from "@/lib/errors";
+import { LoadError } from "@/components/LoadError";
 
 type Tab = "upcoming" | "hosted" | "past" | "favorites";
 
@@ -27,6 +29,8 @@ export const YouTab = () => {
   const [buckets, setBuckets] = useState<MyActivitiesBuckets>({ upcoming: [], hosted: [], past: [] });
   const [favorites, setFavorites] = useState<MockActivity[]>([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [tab, setTab] = useState<Tab>("upcoming");
   const [active, setActive] = useState<MockActivity | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -71,7 +75,10 @@ export const YouTab = () => {
         if (!cancelled) {
           setBuckets(b);
           setFavorites(f);
+          setDataError(null);
         }
+      } catch (e) {
+        if (!cancelled) setDataError(errorMessage(e, "Failed to load your activities"));
       } finally {
         if (!cancelled) setLoadingData(false);
       }
@@ -101,7 +108,7 @@ export const YouTab = () => {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, reloadKey]);
 
   if (loading) {
     return <div className="pt-12 text-center text-sm text-muted-foreground">Loading…</div>;
@@ -247,6 +254,12 @@ export const YouTab = () => {
               <div className="grid place-items-center py-8 text-muted-foreground">
                 <Loader2 className="size-5 animate-spin" />
               </div>
+            ) : dataError ? (
+              <LoadError
+                title="Couldn't load your activities"
+                message={dataError}
+                onRetry={() => setReloadKey((k) => k + 1)}
+              />
             ) : list.length === 0 ? (
               <EmptyState {...emptyCopy[tab]} />
             ) : (
