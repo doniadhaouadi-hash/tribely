@@ -82,6 +82,11 @@ export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Prop
 
   return (
     <div className="space-y-5 pt-2">
+      <div className="space-y-0.5">
+        <h1 className="font-display text-2xl font-bold leading-tight">Find your tribe.</h1>
+        <p className="text-sm text-muted-foreground">Move together in {city.name}.</p>
+      </div>
+
       <div className="flex items-center gap-2">
         <div className="flex-1">
           <SearchBar value={query} onChange={setQuery} />
