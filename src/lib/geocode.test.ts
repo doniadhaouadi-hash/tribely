@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { acceptLanguage, clampLocation, MAX_LOCATION_LENGTH, shortPlaceLabel } from "@/lib/geocode";
+import {
+  acceptLanguage,
+  clampLocation,
+  dedupeByLabel,
+  MAX_LOCATION_LENGTH,
+  shortPlaceLabel,
+} from "@/lib/geocode";
 
 // The suggestion Donia picked live (125 characters).
 const GALLERIA =
@@ -56,5 +62,17 @@ describe("acceptLanguage (QA-029)", () => {
     expect(decodeURIComponent(acceptLanguage(["de-DE", "de"]))).toBe("de-DE,de,en");
     expect(decodeURIComponent(acceptLanguage(["en-US", "en"]))).toBe("en-US,en");
     expect(acceptLanguage([])).toBe("en");
+  });
+});
+
+describe("dedupeByLabel (QA-030)", () => {
+  it("keeps the first of several results with the same label", () => {
+    const yas = "Yas Mall, Al Khuyoul Street, Yas Island, Abu Dhabi";
+    const out = dedupeByLabel([
+      { label: yas, lat: 1, lng: 1 },
+      { label: yas.toUpperCase(), lat: 2, lng: 2 },
+      { label: "Yas Marina", lat: 3, lng: 3 },
+    ]);
+    expect(out.map((p) => p.lat)).toEqual([1, 3]);
   });
 });

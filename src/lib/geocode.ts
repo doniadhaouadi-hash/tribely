@@ -92,11 +92,28 @@ export const searchPlaces = async (
   const res = await fetch(url, { signal, headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error("Search failed");
   const data = (await res.json()) as NominatimResult[];
-  return data.map((r) => ({
-    label: shortPlaceLabel(r),
-    lat: parseFloat(r.lat),
-    lng: parseFloat(r.lon),
-  }));
+  return dedupeByLabel(
+    data.map((r) => ({
+      label: shortPlaceLabel(r),
+      lat: parseFloat(r.lat),
+      lng: parseFloat(r.lon),
+    })),
+  );
+};
+
+/**
+ * One suggestion per label: OSM often has several objects for one place
+ * (e.g. a node and a building) that get the same short label (QA-030).
+ * Keeps the first, i.e. best-ranked, hit.
+ */
+export const dedupeByLabel = <T extends { label: string }>(places: T[]): T[] => {
+  const seen = new Set<string>();
+  return places.filter((p) => {
+    const key = p.label.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 };
 
 /** City search for the location switcher (Frankfurt, Berlin, …). */
