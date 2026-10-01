@@ -16,9 +16,7 @@ import {
   countActiveFilters,
   type DiscoverFilters,
 } from "@/components/FilterSheet";
-import { distanceKm } from "@/lib/distance";
-import { FEED_GRACE_MS } from "@/lib/activitiesApi";
-import { timeWindowEnd } from "@/lib/timeWindow";
+import { filterDiscoverActivities } from "@/lib/discoverFilter";
 
 type Props = {
   onOpenActivity?: (a: MockActivity) => void;
@@ -35,40 +33,16 @@ export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Prop
   const [filters, setFilters] = useState<DiscoverFilters>(DEFAULT_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const nowMs = Date.now();
-    const cutoffMs = timeWindowEnd(filters.when, new Date(nowMs));
-
-    let list = activities
-      .filter((a) => (category === "all" ? true : a.category === category))
-      .filter((a) =>
-        q.length === 0
-          ? true
-          : a.title.toLowerCase().includes(q) ||
-            a.description.toLowerCase().includes(q) ||
-            a.address.toLowerCase().includes(q),
-      )
-      .filter((a) => (filters.level === "any" ? true : a.skillLevel === filters.level))
-      .filter((a) => (filters.spontaneousOnly ? a.spontaneous : true))
-      .filter((a) => {
-        const t = new Date(a.startsAt).getTime();
-        return t >= nowMs - FEED_GRACE_MS && t <= cutoffMs;
-      });
-
-    // sort
-    if (filters.sort === "nearest") {
-      list = list
-        .map((a) => ({ a, d: distanceKm(city.lat, city.lng, a.lat, a.lng) }))
-        .sort((x, y) => x.d - y.d)
-        .map((x) => x.a);
-    } else if (filters.sort === "popular") {
-      list = [...list].sort((a, b) => b.joined - a.joined);
-    } else {
-      list = [...list].sort((a, b) => a.startsAt.localeCompare(b.startsAt));
-    }
-    return list;
-  }, [activities, category, query, filters, city.lat, city.lng]);
+  const filtered = useMemo(
+    () =>
+      filterDiscoverActivities(activities, {
+        category,
+        query,
+        filters,
+        origin: { lat: city.lat, lng: city.lng },
+      }),
+    [activities, category, query, filters, city.lat, city.lng],
+  );
 
   const spontaneous = useMemo(
     () => filtered.find((a) => a.spontaneous),
