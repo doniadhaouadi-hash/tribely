@@ -33,6 +33,7 @@ import { useUserRSVPs } from "@/hooks/useUserRSVPs";
 import { useFavorites } from "@/hooks/useFavorites";
 import { downloadIcs } from "@/lib/calendar";
 import { shareActivity } from "@/lib/share";
+import { authLink } from "@/lib/redirect";
 
 type Props = {
   activity: MockActivity | null;
@@ -285,7 +286,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
             <div className="shrink-0 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-border bg-card">
               {!user ? (
                 <Link
-                  to="/auth"
+                  to={authLink(`/?activity=${activity.id}`)}
                   className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary text-primary-foreground py-3.5 text-sm font-semibold shadow-glow"
                 >
                   <LogIn className="size-4" aria-hidden /> Sign in to join

@@ -113,6 +113,23 @@ export const fetchActivitiesWithHosts = async (): Promise<MockActivity[]> => {
   return rows.map((r) => rowToActivity(r, hostMap.get(r.host_id) ?? null));
 };
 
+/** Single activity by id (e.g. for shared links to activities not in the feed). */
+export const fetchActivityById = async (activityId: string): Promise<MockActivity | null> => {
+  const { data: row, error } = await supabase
+    .from("activities")
+    .select("*")
+    .eq("id", activityId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!row) return null;
+  const { data: host } = await supabase
+    .from("profiles")
+    .select("id, display_name, avatar_url, rating")
+    .eq("id", row.host_id)
+    .maybeSingle();
+  return rowToActivity(row, host ?? null);
+};
+
 export const createActivity = async (input: CreateActivityInput) => {
   const { data, error } = await supabase
     .from("activities")

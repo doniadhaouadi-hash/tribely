@@ -12,6 +12,8 @@ import { ActivityDetailSheet } from "@/components/ActivityDetailSheet";
 import { LocationPickerSheet } from "@/components/LocationPickerSheet";
 import { isTabKey, type TabKey } from "@/lib/tabs";
 import { useActivities } from "@/hooks/useActivities";
+import { fetchActivityById } from "@/lib/activitiesApi";
+import { toast } from "sonner";
 import type { MockActivity } from "@/data/activities";
 
 const Index = () => {
@@ -19,7 +21,7 @@ const Index = () => {
   const tabParam = searchParams.get("tab");
   const activityParam = searchParams.get("activity");
   const activeTab: TabKey = isTabKey(tabParam) ? tabParam : "discover";
-  const { activities } = useActivities();
+  const { activities, loading: activitiesLoading } = useActivities();
 
   const [activeActivity, setActiveActivity] = useState<MockActivity | null>(null);
 
@@ -31,17 +33,38 @@ const Index = () => {
     }
   }, [tabParam, searchParams, setSearchParams]);
 
-  // Deep link: open shared activity once it's loaded
+  // Deep link: open shared activity once the feed is loaded. Activities that
+  // aren't in the feed (e.g. already started) are fetched by id.
   useEffect(() => {
-    if (!activityParam) return;
-    const found = activities.find((a) => a.id === activityParam);
-    if (found) {
-      setActiveActivity(found);
+    if (!activityParam || activitiesLoading) return;
+    let cancelled = false;
+    const clearParam = () => {
       const next = new URLSearchParams(searchParams);
       next.delete("activity");
       setSearchParams(next, { replace: true });
+    };
+    const found = activities.find((a) => a.id === activityParam);
+    if (found) {
+      setActiveActivity(found);
+      clearParam();
+      return;
     }
-  }, [activityParam, activities, searchParams, setSearchParams]);
+    fetchActivityById(activityParam)
+      .then((a) => {
+        if (cancelled) return;
+        if (a) setActiveActivity(a);
+        else toast.error("This activity is no longer available");
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Couldn't open the shared activity");
+      })
+      .finally(() => {
+        if (!cancelled) clearParam();
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activityParam, activities, activitiesLoading, searchParams, setSearchParams]);
 
   // Keep the open detail sheet in sync after an edit (or any realtime update).
   useEffect(() => {

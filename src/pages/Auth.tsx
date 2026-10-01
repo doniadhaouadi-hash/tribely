@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { GlassBackground } from "@/components/GlassBackground";
+import { safeRedirect } from "@/lib/redirect";
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 const passwordSchema = z.string().min(8, "At least 8 characters").max(72);
@@ -16,6 +17,9 @@ type Mode = "signin" | "signup";
 const Auth = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Where to go after login, e.g. back to a shared activity.
+  const redirectTo = safeRedirect(searchParams.get("redirect"));
   const [mode, setMode] = useState<Mode>("signin");
   const [submitting, setSubmitting] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
@@ -23,7 +27,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  if (!loading && user) return <Navigate to="/?tab=discover" replace />;
+  if (!loading && user) return <Navigate to={redirectTo} replace />;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -38,7 +42,7 @@ const Auth = () => {
           email: emailV,
           password: passV,
           options: {
-            emailRedirectTo: `${window.location.origin}/?tab=discover`,
+            emailRedirectTo: `${window.location.origin}${redirectTo}`,
             data: { display_name: nameV },
           },
         });
@@ -46,7 +50,7 @@ const Auth = () => {
         toast.success("Welcome to Tribely!", {
           description: "Check your inbox to confirm your email.",
         });
-        navigate("/?tab=discover");
+        navigate(redirectTo);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: emailV,
@@ -54,7 +58,7 @@ const Auth = () => {
         });
         if (error) throw error;
         toast.success("Welcome back");
-        navigate("/?tab=discover");
+        navigate(redirectTo);
       }
     } catch (err) {
       const msg =
@@ -99,7 +103,7 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/?tab=discover`,
+          redirectTo: `${window.location.origin}${redirectTo}`,
         },
       });
       if (error) {
