@@ -3,6 +3,7 @@ import { Check, RotateCcw, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SkillLevel } from "@/data/activities";
 import type { TimeWindow } from "@/lib/timeWindow";
+import { DEFAULT_RADIUS_KM } from "@/lib/distance";
 
 export type SortKey = "soonest" | "nearest" | "popular";
 
@@ -10,6 +11,8 @@ export type DiscoverFilters = {
   level: SkillLevel | "any";
   spontaneousOnly: boolean;
   when: TimeWindow;
+  /** Max distance from the selected city in km; 0 = any distance. */
+  radiusKm: 10 | 30 | 100 | 0;
   sort: SortKey;
 };
 
@@ -17,6 +20,7 @@ export const DEFAULT_FILTERS: DiscoverFilters = {
   level: "any",
   spontaneousOnly: false,
   when: "any",
+  radiusKm: DEFAULT_RADIUS_KM,
   sort: "soonest",
 };
 
@@ -32,6 +36,13 @@ const TIMES: { key: TimeWindow; label: string }[] = [
   { key: "6h", label: "Next 6h" },
   { key: "today", label: "Today" },
   { key: "3d", label: "3 days" },
+];
+
+const RADII: { key: DiscoverFilters["radiusKm"]; label: string }[] = [
+  { key: 10, label: "10 km" },
+  { key: 30, label: "30 km" },
+  { key: 100, label: "100 km" },
+  { key: 0, label: "Anywhere" },
 ];
 
 const SORTS: { key: SortKey; label: string }[] = [
@@ -81,6 +92,14 @@ export const FilterSheet = ({ open, onOpenChange, value, onChange }: Props) => {
                 items={LEVELS}
                 isActive={(k) => value.level === k}
                 onSelect={(k) => update("level", k)}
+              />
+            </Group>
+
+            <Group title="Distance">
+              <ChipRow
+                items={RADII}
+                isActive={(k) => value.radiusKm === k}
+                onSelect={(k) => update("radiusKm", k)}
               />
             </Group>
 
@@ -201,6 +220,7 @@ export const countActiveFilters = (f: DiscoverFilters) => {
   if (f.level !== "any") n++;
   if (f.spontaneousOnly) n++;
   if (f.when !== "any") n++;
+  if (f.radiusKm !== DEFAULT_RADIUS_KM) n++;
   if (f.sort !== "soonest") n++;
   return n;
 };

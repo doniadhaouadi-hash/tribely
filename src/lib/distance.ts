@@ -22,3 +22,13 @@ export const formatDistance = (km: number): string => {
   if (km < 10) return `${km.toFixed(1)}km`;
   return `${Math.round(km)}km`;
 };
+
+/** "Nearby" means within this distance of the selected city (Discover default, Map, stats). */
+export const DEFAULT_RADIUS_KM = 30;
+
+/** Is the point within `radiusKm` of the origin? A radius of 0 means "any distance". */
+export const isWithinRadius = (
+  origin: { lat: number; lng: number },
+  point: { lat: number; lng: number },
+  radiusKm: number,
+) => radiusKm <= 0 || distanceKm(origin.lat, origin.lng, point.lat, point.lng) <= radiusKm;

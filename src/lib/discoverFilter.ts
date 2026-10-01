@@ -1,7 +1,7 @@
 import type { CategoryKey, MockActivity } from "@/data/activities";
 import type { DiscoverFilters } from "@/components/FilterSheet";
 import { FEED_GRACE_MS } from "@/lib/activitiesApi";
-import { distanceKm } from "@/lib/distance";
+import { distanceKm, isWithinRadius } from "@/lib/distance";
 import { timeWindowEnd } from "@/lib/timeWindow";
 
 export type DiscoverQuery = {
@@ -13,7 +13,7 @@ export type DiscoverQuery = {
   now?: Date;
 };
 
-/** Filters and sorts the Discover feed (category, search, level, vibe, time window, sort). */
+/** Filters and sorts the Discover feed (distance, category, search, level, vibe, time window, sort). */
 export const filterDiscoverActivities = (
   activities: MockActivity[],
   { category, query, filters, origin, now = new Date() }: DiscoverQuery,
@@ -23,6 +23,7 @@ export const filterDiscoverActivities = (
   const cutoffMs = timeWindowEnd(filters.when, now);
 
   const list = activities
+    .filter((a) => isWithinRadius(origin, a, filters.radiusKm))
     .filter((a) => (category === "all" ? true : a.category === category))
     .filter((a) =>
       q.length === 0

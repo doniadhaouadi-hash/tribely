@@ -17,6 +17,7 @@ import {
   type DiscoverFilters,
 } from "@/components/FilterSheet";
 import { filterDiscoverActivities } from "@/lib/discoverFilter";
+import { DEFAULT_RADIUS_KM, isWithinRadius } from "@/lib/distance";
 
 type Props = {
   onOpenActivity?: (a: MockActivity) => void;
@@ -25,13 +26,18 @@ type Props = {
 };
 
 export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Props) => {
-  const { city } = useLocation();
+  const { city, openPicker } = useLocation();
   const { profile } = useAuth();
   const { activities, loading, error, retry } = useActivities();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryKey | "all">("all");
   const [filters, setFilters] = useState<DiscoverFilters>(DEFAULT_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
+
+  const nearbyCount = useMemo(
+    () => activities.filter((a) => isWithinRadius(city, a, DEFAULT_RADIUS_KM)).length,
+    [activities, city],
+  );
 
   const filtered = useMemo(
     () =>
@@ -86,7 +92,7 @@ export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Prop
 
       <StatChipsRow
         stats={[
-          { Icon: MapPin,   label: "Nearby",  value: activities.length,                 tone: "primary" },
+          { Icon: MapPin,   label: "Nearby",  value: nearbyCount,                       tone: "primary" },
           { Icon: Flame,    label: "Streak",  value: `${profile?.streak_count ?? 0}d`,  tone: "accent" },
           { Icon: Sparkles, label: "Rating",  value: profile?.rating ? `${Number(profile.rating).toFixed(1)}★` : "—", tone: "primary" },
         ]}
@@ -122,8 +128,13 @@ export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Prop
           </div>
         ) : error && activities.length === 0 ? (
           <LoadError message={error} onRetry={retry} />
-        ) : upcoming.length === 0 ? (
-          <EmptyState category={category} onHostClick={onHostClick} />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            category={category}
+            cityName={city.name}
+            onHostClick={onHostClick}
+            onChangeCity={openPicker}
+          />
         ) : (
           <div className="flex flex-col gap-3">
             {upcoming.map((a) => (
@@ -145,31 +156,46 @@ export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Prop
 
 const EmptyState = ({
   category,
+  cityName,
   onHostClick,
+  onChangeCity,
 }: {
   category: CategoryKey | "all";
+  cityName: string;
   onHostClick?: () => void;
+  onChangeCity?: () => void;
 }) => (
   <div className="rounded-2xl bg-card border border-border shadow-soft p-8 text-center space-y-3">
     <div className="text-3xl" aria-hidden>🌱</div>
     <div className="space-y-1">
       <h3 className="font-display text-base font-semibold">
         {category === "all"
-          ? "Be the first to host here!"
+          ? `Nothing near ${cityName} yet`
           : "No matches for this filter"}
       </h3>
       <p className="text-xs text-muted-foreground">
         {category === "all"
-          ? "Your tribe is waiting to be assembled."
-          : "Try a different category or clear your search."}
+          ? "Be the first to host here, or look around another city."
+          : "Try a different category, a bigger distance or clear your search."}
       </p>
     </div>
-    <button
-      type="button"
-      onClick={onHostClick}
-      className="rounded-full bg-primary text-primary-foreground px-5 py-2 text-sm font-semibold shadow-glow hover:scale-[1.02] transition-transform ease-bounce"
-    >
-      Host an activity
-    </button>
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      <button
+        type="button"
+        onClick={onHostClick}
+        className="rounded-full bg-primary text-primary-foreground px-5 py-2 text-sm font-semibold shadow-glow hover:scale-[1.02] transition-transform ease-bounce"
+      >
+        Host an activity
+      </button>
+      {onChangeCity && (
+        <button
+          type="button"
+          onClick={onChangeCity}
+          className="rounded-full glass px-5 py-2 text-sm font-semibold text-foreground hover:bg-white/20 transition-colors"
+        >
+          Change city
+        </button>
+      )}
+    </div>
   </div>
 );

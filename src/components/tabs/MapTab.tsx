@@ -11,6 +11,7 @@ import { createCategoryMarker } from "@/lib/mapMarker";
 import { ActivityPreviewCard } from "@/components/ActivityPreviewCard";
 import { LoadError } from "@/components/LoadError";
 import { FEED_GRACE_MS } from "@/lib/activitiesApi";
+import { DEFAULT_RADIUS_KM, isWithinRadius } from "@/lib/distance";
 
 type Props = {
   onOpenActivity?: (a: MockActivity) => void;
@@ -37,8 +38,9 @@ export const MapTab = ({ onOpenActivity }: Props) => {
     const minStart = Date.now() - FEED_GRACE_MS;
     return activities
       .filter((a) => new Date(a.startsAt).getTime() >= minStart)
+      .filter((a) => isWithinRadius(city, a, DEFAULT_RADIUS_KM))
       .filter((a) => (category === "all" ? true : a.category === category));
-  }, [activities, category]);
+  }, [activities, category, city]);
 
   useEffect(() => {
     if (selected && !filtered.some((a) => a.id === selected.id)) {

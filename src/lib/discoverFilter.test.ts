@@ -32,9 +32,11 @@ describe("filterDiscoverActivities", () => {
     lat: 50.2,
     lng: 8.7,
   });
-  const tomorrow = makeActivity({ id: "tomorrow", startsAt: at(9, 2), lat: 52.52, lng: 13.405 });
+  // ~25 km from Frankfurt (Darmstadt): inside the default 30 km radius
+  const tomorrow = makeActivity({ id: "tomorrow", startsAt: at(9, 2), lat: 49.8728, lng: 8.6512 });
+  const abuDhabi = makeActivity({ id: "abu-dhabi", startsAt: at(17), lat: 24.49, lng: 54.35 });
   const past = makeActivity({ id: "past", startsAt: at(10) }); // 2h ago
-  const all = [run, yoga, tomorrow, past];
+  const all = [run, yoga, tomorrow, past, abuDhabi];
 
   it("drops activities that started more than 30 minutes ago and sorts by start", () => {
     expect(ids(filterDiscoverActivities(all, base))).toEqual(["yoga", "run", "tomorrow"]);
@@ -66,5 +68,26 @@ describe("filterDiscoverActivities", () => {
       "yoga",
       "tomorrow",
     ]);
+  });
+});
+
+describe("filterDiscoverActivities radius (QA-026)", () => {
+  const frankfurt = makeActivity({ id: "fra", startsAt: at(18) });
+  const darmstadt = makeActivity({ id: "da", startsAt: at(18), lat: 49.8728, lng: 8.6512 });
+  const abuDhabi = makeActivity({ id: "auh", startsAt: at(18), lat: 24.49, lng: 54.35 });
+  const all = [frankfurt, darmstadt, abuDhabi];
+  const withRadius = (radiusKm: 10 | 30 | 100 | 0) => ({
+    ...base,
+    filters: { ...DEFAULT_FILTERS, radiusKm },
+  });
+
+  it("hides activities in other cities by default (30 km)", () => {
+    expect(DEFAULT_FILTERS.radiusKm).toBe(30);
+    expect(ids(filterDiscoverActivities(all, base))).toEqual(["fra", "da"]);
+  });
+
+  it("respects smaller and unlimited radius", () => {
+    expect(ids(filterDiscoverActivities(all, withRadius(10)))).toEqual(["fra"]);
+    expect(ids(filterDiscoverActivities(all, withRadius(0)))).toEqual(["fra", "da", "auh"]);
   });
 });
