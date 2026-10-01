@@ -1,24 +1,47 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const BUCKET = "tribely-media";
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_BYTES = 5 * 1024 * 1024; // 5MB — must match the bucket's file_size_limit
+/** Must match the bucket's allowed_mime_types (no SVG: it can carry scripts). */
+export const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/heic",
+  "image/heif",
+];
 
 export class UploadError extends Error {}
 
+/**
+ * Storage path for an upload. The first folder must be the uploader's user id —
+ * the bucket's INSERT policy rejects anything else.
+ */
+export const buildUploadPath = (
+  ownerId: string,
+  folder: "avatars" | "activities",
+  fileName: string,
+  now = Date.now(),
+) => {
+  const ext = fileName.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  return `${ownerId}/${folder}/${now}.${ext}`;
+};
+
 /** Uploads an image to the public `tribely-media` bucket and returns its public URL. */
 export const uploadImage = async (file: File, folder: "avatars" | "activities", ownerId: string) => {
-  if (!file.type.startsWith("image/")) {
-    throw new UploadError("Please choose an image file");
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    throw new UploadError("Please choose a JPG, PNG, WebP, GIF or HEIC image");
   }
   if (file.size > MAX_BYTES) {
     throw new UploadError("Image must be smaller than 5MB");
   }
 
-  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-  const path = `${folder}/${ownerId}-${Date.now()}.${ext}`;
+  const path = buildUploadPath(ownerId, folder, file.name);
 
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
     cacheControl: "3600",
+    contentType: file.type,
     upsert: false,
   });
   if (error) throw new UploadError(error.message);
