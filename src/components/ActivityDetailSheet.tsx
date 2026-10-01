@@ -370,6 +370,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
     <EditActivitySheet
       activity={editing ? activity : null}
       onOpenChange={(o) => !o && setEditing(false)}
+      onCancelled={() => onOpenChange(false)}
     />
     </>
   );

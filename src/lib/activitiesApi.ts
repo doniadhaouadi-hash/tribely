@@ -198,6 +198,15 @@ export const updateActivity = async (activityId: string, input: UpdateActivityIn
   if (error) throw error;
 };
 
+/** Host cancels an activity: it disappears from feeds, but rows are kept. */
+export const cancelActivity = async (activityId: string) => {
+  const { error } = await supabase
+    .from("activities")
+    .update({ status: "cancelled" })
+    .eq("id", activityId);
+  if (error) throw error;
+};
+
 export const joinActivity = async (activityId: string, userId: string) => {
   const { error } = await supabase
     .from("activity_participants")

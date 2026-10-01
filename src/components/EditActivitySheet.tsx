@@ -1,11 +1,29 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { ImagePlus, Loader2, MapPin, Sparkles, X } from "lucide-react";
+import { Ban, ImagePlus, Loader2, MapPin, Sparkles, X } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useLocation } from "@/context/LocationContext";
 import { CATEGORIES, type CategoryKey, type MockActivity } from "@/data/activities";
-import { SKILL_TO_LEVEL, toPickableSkill, updateActivity, type PickableSkillLevel } from "@/lib/activitiesApi";
+import {
+  cancelActivity,
+  SKILL_TO_LEVEL,
+  toPickableSkill,
+  updateActivity,
+  type PickableSkillLevel,
+} from "@/lib/activitiesApi";
+import { errorMessage } from "@/lib/errors";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { LevelPicker } from "@/components/LevelPicker";
 import { uploadImage, UploadError } from "@/lib/uploadImage";
 import { searchPlaces, type GeoPlace } from "@/lib/geocode";
@@ -26,9 +44,11 @@ type Props = {
   activity: MockActivity | null;
   onOpenChange: (open: boolean) => void;
   onSaved?: () => void;
+  /** Called after the host cancelled the activity (e.g. to close the detail sheet). */
+  onCancelled?: () => void;
 };
 
-export const EditActivitySheet = ({ activity, onOpenChange, onSaved }: Props) => {
+export const EditActivitySheet = ({ activity, onOpenChange, onSaved, onCancelled }: Props) => {
   const { city } = useLocation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -47,6 +67,7 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved }: Props) =>
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const open = !!activity;
@@ -195,6 +216,21 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved }: Props) =>
       toast.error(msg);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCancelActivity = async () => {
+    if (!activity) return;
+    setCancelling(true);
+    try {
+      await cancelActivity(activity.id);
+      toast.success("Activity cancelled");
+      onOpenChange(false);
+      onCancelled?.();
+    } catch (err) {
+      toast.error(errorMessage(err, "Couldn't cancel the activity"));
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -424,6 +460,42 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved }: Props) =>
                 {saving && <Loader2 className="size-4 animate-spin" aria-hidden />}
                 {uploadingCover ? "Uploading photo…" : "Save changes"}
               </button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    type="button"
+                    disabled={saving || cancelling}
+                    className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-60"
+                  >
+                    {cancelling ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                    ) : (
+                      <Ban className="size-4" aria-hidden />
+                    )}
+                    Cancel activity
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Cancel this activity?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      It will disappear from Discover and the map, and{" "}
+                      {activity.joined === 1 ? "the 1 person" : `the ${activity.joined} people`} who
+                      joined won't see it in their upcoming list anymore. This can't be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Keep it</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleCancelActivity}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Cancel activity
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </form>
         )}
