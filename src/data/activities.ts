@@ -57,7 +57,6 @@ export type MockActivity = {
   lat: number;
   lng: number;
   address: string;
-  city: string;
   startsAt: string; // ISO
   durationMinutes: number;
   capacity: number;

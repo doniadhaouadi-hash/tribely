@@ -9,7 +9,6 @@ export const makeActivity = (over: Partial<MockActivity> = {}): MockActivity => 
   lat: 50.1109,
   lng: 8.6821,
   address: "Eiserner Steg, Frankfurt",
-  city: "Frankfurt",
   startsAt: "2026-10-01T18:00:00.000Z",
   durationMinutes: 60,
   capacity: 8,

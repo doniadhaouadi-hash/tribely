@@ -71,7 +71,6 @@ export const rowToActivity = (
   lat: row.lat,
   lng: row.lng,
   address: row.address ?? row.location_name,
-  city: "Frankfurt",
   startsAt: row.start_at,
   durationMinutes: row.duration_min,
   capacity: row.max_participants,

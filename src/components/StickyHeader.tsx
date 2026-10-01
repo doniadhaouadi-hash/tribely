@@ -22,7 +22,8 @@ export const StickyHeader = () => {
           >
             <MapPin className="size-3.5 text-primary" aria-hidden />
             <span className="truncate max-w-[8rem]">
-              {city.name}, {city.countryCode}
+              {city.name}
+              {city.countryCode ? `, ${city.countryCode}` : ""}
             </span>
             <ChevronDown className="size-3.5 text-muted-foreground" aria-hidden />
           </button>
