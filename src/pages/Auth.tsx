@@ -14,6 +14,10 @@ const nameSchema = z.string().trim().min(1, "Required").max(60);
 
 type Mode = "signin" | "signup";
 
+// Only show "Continue with Google" once the Google provider is enabled in
+// Supabase (Auth → Providers). Set VITE_ENABLE_GOOGLE_AUTH=true in Vercel then.
+const GOOGLE_AUTH_ENABLED = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === "true";
+
 const Auth = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -157,25 +161,29 @@ const Auth = () => {
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={handleGoogle}
-            disabled={oauthLoading || submitting}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full glass px-4 py-3 text-sm font-medium text-foreground hover:bg-white/20 transition-colors disabled:opacity-60"
-          >
-            {oauthLoading ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-            ) : (
-              <GoogleIcon />
-            )}
-            Continue with Google
-          </button>
+          {GOOGLE_AUTH_ENABLED && (
+            <>
+              <button
+                type="button"
+                onClick={handleGoogle}
+                disabled={oauthLoading || submitting}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-full glass px-4 py-3 text-sm font-medium text-foreground hover:bg-white/20 transition-colors disabled:opacity-60"
+              >
+                {oauthLoading ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <GoogleIcon />
+                )}
+                Continue with Google
+              </button>
 
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex-1 h-px bg-border" />
-            or
-            <span className="flex-1 h-px bg-border" />
-          </div>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="flex-1 h-px bg-border" />
+                or
+                <span className="flex-1 h-px bg-border" />
+              </div>
+            </>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-3">
             {mode === "signup" && (
