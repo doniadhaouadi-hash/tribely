@@ -47,6 +47,17 @@ const LEVEL_TO_SKILL: Record<ActivityRow["level_required"], SkillLevel> = {
   pro: "committed",
 };
 
+/** Levels a host can pick; "all" is only a display value. */
+export type PickableSkillLevel = Exclude<SkillLevel, "all">;
+
+export const SKILL_TO_LEVEL: Record<PickableSkillLevel, ActivityRow["level_required"]> = {
+  casual: "beginner",
+  intermediate: "intermediate",
+  committed: "advanced",
+};
+
+export const toPickableSkill = (s: SkillLevel): PickableSkillLevel => (s === "all" ? "casual" : s);
+
 export const uiToDbCategory = (k: CategoryKey) => UI_TO_DB[k];
 
 export const rowToActivity = (
@@ -167,6 +178,7 @@ export type UpdateActivityInput = Partial<{
   title: string;
   description: string | null;
   category: CategoryKey;
+  level_required: ActivityRow["level_required"];
   location_name: string;
   address: string | null;
   lat: number;

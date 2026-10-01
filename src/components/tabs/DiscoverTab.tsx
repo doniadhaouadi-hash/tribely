@@ -18,6 +18,7 @@ import {
 } from "@/components/FilterSheet";
 import { distanceKm } from "@/lib/distance";
 import { FEED_GRACE_MS } from "@/lib/activitiesApi";
+import { timeWindowEnd } from "@/lib/timeWindow";
 
 type Props = {
   onOpenActivity?: (a: MockActivity) => void;
@@ -37,8 +38,7 @@ export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Prop
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const nowMs = Date.now();
-    const cutoffMs =
-      filters.withinHours === 0 ? Infinity : nowMs + filters.withinHours * 3600_000;
+    const cutoffMs = timeWindowEnd(filters.when, new Date(nowMs));
 
     let list = activities
       .filter((a) => (category === "all" ? true : a.category === category))

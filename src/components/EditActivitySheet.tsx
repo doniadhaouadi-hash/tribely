@@ -5,7 +5,8 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useLocation } from "@/context/LocationContext";
 import { CATEGORIES, type CategoryKey, type MockActivity } from "@/data/activities";
-import { updateActivity } from "@/lib/activitiesApi";
+import { SKILL_TO_LEVEL, toPickableSkill, updateActivity, type PickableSkillLevel } from "@/lib/activitiesApi";
+import { LevelPicker } from "@/components/LevelPicker";
 import { uploadImage, UploadError } from "@/lib/uploadImage";
 import { searchPlaces, type GeoPlace } from "@/lib/geocode";
 
@@ -40,6 +41,7 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved }: Props) =>
   const [startAt, setStartAt] = useState("");
   const [duration, setDuration] = useState(60);
   const [maxParticipants, setMaxParticipants] = useState(8);
+  const [level, setLevel] = useState<PickableSkillLevel>("casual");
   const [spontaneous, setSpontaneous] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
@@ -60,6 +62,7 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved }: Props) =>
     setStartAt(toLocalInputValue(activity.startsAt));
     setDuration(activity.durationMinutes);
     setMaxParticipants(activity.capacity);
+    setLevel(toPickableSkill(activity.skillLevel));
     setSpontaneous(activity.spontaneous);
     setCoverPreview(activity.coverUrl);
     setCoverUrl(activity.coverUrl);
@@ -174,6 +177,7 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved }: Props) =>
         start_at: startISO,
         duration_min: duration,
         max_participants: maxParticipants,
+        level_required: SKILL_TO_LEVEL[level],
         spontaneous,
         cover_url: coverUrl,
       });
@@ -375,6 +379,11 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved }: Props) =>
                   className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </Field>
+
+              <section className="space-y-1.5">
+                <span className="text-xs font-medium text-muted-foreground">Level</span>
+                <LevelPicker value={level} onChange={setLevel} />
+              </section>
 
               <Field label="Description (optional)">
                 <textarea

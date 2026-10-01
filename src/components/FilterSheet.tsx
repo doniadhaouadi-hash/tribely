@@ -2,20 +2,21 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Check, RotateCcw, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SkillLevel } from "@/data/activities";
+import type { TimeWindow } from "@/lib/timeWindow";
 
 export type SortKey = "soonest" | "nearest" | "popular";
 
 export type DiscoverFilters = {
   level: SkillLevel | "any";
   spontaneousOnly: boolean;
-  withinHours: 0 | 6 | 24 | 72; // 0 = any time
+  when: TimeWindow;
   sort: SortKey;
 };
 
 export const DEFAULT_FILTERS: DiscoverFilters = {
   level: "any",
   spontaneousOnly: false,
-  withinHours: 0,
+  when: "any",
   sort: "soonest",
 };
 
@@ -26,11 +27,11 @@ const LEVELS: { key: DiscoverFilters["level"]; label: string }[] = [
   { key: "committed", label: "Committed" },
 ];
 
-const TIMES: { key: DiscoverFilters["withinHours"]; label: string }[] = [
-  { key: 0, label: "Anytime" },
-  { key: 6, label: "Next 6h" },
-  { key: 24, label: "Today" },
-  { key: 72, label: "3 days" },
+const TIMES: { key: TimeWindow; label: string }[] = [
+  { key: "any", label: "Anytime" },
+  { key: "6h", label: "Next 6h" },
+  { key: "today", label: "Today" },
+  { key: "3d", label: "3 days" },
 ];
 
 const SORTS: { key: SortKey; label: string }[] = [
@@ -84,8 +85,8 @@ export const FilterSheet = ({ open, onOpenChange, value, onChange }: Props) => {
             <Group title="When">
               <ChipRow
                 items={TIMES}
-                isActive={(k) => value.withinHours === k}
-                onSelect={(k) => update("withinHours", k)}
+                isActive={(k) => value.when === k}
+                onSelect={(k) => update("when", k)}
               />
             </Group>
 
@@ -197,7 +198,7 @@ export const countActiveFilters = (f: DiscoverFilters) => {
   let n = 0;
   if (f.level !== "any") n++;
   if (f.spontaneousOnly) n++;
-  if (f.withinHours !== 0) n++;
+  if (f.when !== "any") n++;
   if (f.sort !== "soonest") n++;
   return n;
 };

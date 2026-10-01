@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { CATEGORIES, type CategoryKey } from "@/data/activities";
-import { createActivity } from "@/lib/activitiesApi";
+import { createActivity, SKILL_TO_LEVEL, type PickableSkillLevel } from "@/lib/activitiesApi";
+import { LevelPicker } from "@/components/LevelPicker";
 import { uploadImage, UploadError } from "@/lib/uploadImage";
 import { searchPlaces, type GeoPlace } from "@/lib/geocode";
 
@@ -40,6 +41,7 @@ export const CreateTab = () => {
   const [startAt, setStartAt] = useState(() => localISONow(60));
   const [duration, setDuration] = useState(60);
   const [maxParticipants, setMaxParticipants] = useState(8);
+  const [level, setLevel] = useState<PickableSkillLevel>("casual");
   const [spontaneous, setSpontaneous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -186,6 +188,7 @@ export const CreateTab = () => {
         start_at: startISO,
         duration_min: duration,
         max_participants: maxParticipants,
+        level_required: SKILL_TO_LEVEL[level],
         spontaneous,
         cover_url: coverUrl,
       });
@@ -381,6 +384,11 @@ export const CreateTab = () => {
           className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </Field>
+
+      <section className="space-y-1.5">
+        <Label>Level</Label>
+        <LevelPicker value={level} onChange={setLevel} />
+      </section>
 
       <Field label="Description (optional)">
         <textarea
