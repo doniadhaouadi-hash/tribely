@@ -9,6 +9,7 @@ import {
   Heart,
   Loader2,
   LogIn,
+  MessageCircle,
   MapPin,
   Pencil,
   Share2,
@@ -18,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import { EditActivitySheet } from "@/components/EditActivitySheet";
+import { ChatSheet } from "@/components/ChatSheet";
 import { Link } from "react-router-dom";
 import { formatActivityTime } from "@/lib/format";
 import { toast } from "sonner";
@@ -51,6 +53,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
   const [loadingParts, setLoadingParts] = useState(false);
   const [acting, setActing] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [chatting, setChatting] = useState(false);
   const favorited = !!activity && favoriteIds.has(activity.id);
 
   const open = !!activity;
@@ -58,6 +61,11 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
   const tint = cat ? `hsl(var(${cat.tintVar}))` : "transparent";
   const isJoined = !!activity && joinedIds.has(activity.id);
   const isHost = !!activity && !!user && user.id === activity.host.id;
+  // Same rule as the chat RLS policy (is_activity_member): host or "going".
+  const canChat = isHost || (!!user && isJoined);
+
+  // Don't carry an open chat over to the next activity that's opened.
+  useEffect(() => setChatting(false), [activity?.id]);
 
   const loadParticipants = useCallback(async (activityId: string) => {
     const next = await fetchParticipants(activityId);
@@ -311,7 +319,10 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
                 </div>
               </section>
 
-              <section className="grid grid-cols-3 gap-2">
+              <section className={cn("grid gap-2", canChat ? "grid-cols-4" : "grid-cols-3")}>
+                {canChat && (
+                  <ActionTile Icon={MessageCircle} label="Chat" onClick={() => setChatting(true)} />
+                )}
                 <ActionTile
                   Icon={Heart}
                   label="Favorite"
@@ -373,6 +384,10 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
       activity={editing ? activity : null}
       onOpenChange={(o) => !o && setEditing(false)}
       onCancelled={() => onOpenChange(false)}
+    />
+    <ChatSheet
+      activity={chatting && canChat ? activity : null}
+      onOpenChange={(o) => !o && setChatting(false)}
     />
     </>
   );
