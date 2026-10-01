@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/Avatar";
 
 export const StickyHeader = () => {
-  const { city } = useLocation();
+  const { city, openPicker } = useLocation();
   const { user, profile } = useAuth();
 
   return (
@@ -14,6 +14,7 @@ export const StickyHeader = () => {
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
+            onClick={openPicker}
             aria-label="Change location"
             className="flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-foreground hover:bg-white/20 transition-colors"
           >

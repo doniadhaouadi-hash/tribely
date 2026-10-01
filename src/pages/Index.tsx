@@ -9,6 +9,7 @@ import { CreateTab } from "@/components/tabs/CreateTab";
 import { ChatTab } from "@/components/tabs/ChatTab";
 import { YouTab } from "@/components/tabs/YouTab";
 import { ActivityDetailSheet } from "@/components/ActivityDetailSheet";
+import { LocationPickerSheet } from "@/components/LocationPickerSheet";
 import { isTabKey, type TabKey } from "@/lib/tabs";
 import { useActivities } from "@/hooks/useActivities";
 import type { MockActivity } from "@/data/activities";
@@ -89,6 +90,7 @@ const Index = () => {
         activity={activeActivity}
         onOpenChange={(open) => !open && setActiveActivity(null)}
       />
+      <LocationPickerSheet />
     </div>
   );
 };

@@ -19,13 +19,26 @@ const FRANKFURT: City = {
 type LocationContextValue = {
   city: City;
   setCity: (c: City) => void;
+  pickerOpen: boolean;
+  openPicker: () => void;
+  closePicker: () => void;
 };
 
 const LocationContext = createContext<LocationContextValue | null>(null);
 
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [city, setCity] = useState<City>(FRANKFURT);
-  const value = useMemo(() => ({ city, setCity }), [city]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const value = useMemo(
+    () => ({
+      city,
+      setCity,
+      pickerOpen,
+      openPicker: () => setPickerOpen(true),
+      closePicker: () => setPickerOpen(false),
+    }),
+    [city, pickerOpen],
+  );
   return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;
 };
 

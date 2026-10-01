@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ImagePlus, Loader2, Lock, Plus, Sparkles, X } from "lucide-react";
+import { ImagePlus, Loader2, Lock, MapPin, Plus, Sparkles, X } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -8,6 +8,7 @@ import { useLocation } from "@/context/LocationContext";
 import { CATEGORIES, type CategoryKey } from "@/data/activities";
 import { createActivity } from "@/lib/activitiesApi";
 import { uploadImage, UploadError } from "@/lib/uploadImage";
+import { searchPlaces, type GeoPlace } from "@/lib/geocode";
 
 const titleSchema = z.string().trim().min(3, "Min 3 characters").max(80);
 const descSchema = z.string().trim().max(500).optional();
@@ -32,6 +33,10 @@ export const CreateTab = () => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<CategoryKey>("running");
   const [locationName, setLocationName] = useState("");
+  const [selectedPlace, setSelectedPlace] = useState<{ lat: number; lng: number } | null>(null);
+  const [placeSuggestions, setPlaceSuggestions] = useState<GeoPlace[]>([]);
+  const [searchingPlace, setSearchingPlace] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [startAt, setStartAt] = useState(() => localISONow(60));
   const [duration, setDuration] = useState(60);
   const [maxParticipants, setMaxParticipants] = useState(8);
@@ -62,6 +67,38 @@ export const CreateTab = () => {
   const removeCover = () => {
     setCoverPreview(null);
     setCoverUrl(null);
+  };
+
+  useEffect(() => {
+    if (selectedPlace) return;
+    const q = locationName.trim();
+    if (q.length < 3) {
+      setPlaceSuggestions([]);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setSearchingPlace(true);
+      try {
+        const places = await searchPlaces(q, controller.signal, { lat: city.lat, lng: city.lng });
+        setPlaceSuggestions(places);
+      } catch {
+        // aborted or network hiccup — ignore, user is likely still typing
+      } finally {
+        setSearchingPlace(false);
+      }
+    }, 400);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [locationName, selectedPlace, city.lat, city.lng]);
+
+  const selectPlace = (place: GeoPlace) => {
+    setLocationName(place.label);
+    setSelectedPlace({ lat: place.lat, lng: place.lng });
+    setPlaceSuggestions([]);
+    setShowSuggestions(false);
   };
 
   const cat = CATEGORIES[category];
@@ -116,6 +153,27 @@ export const CreateTab = () => {
         throw new Error("Spots must be between 2 and 100");
       }
 
+      let lat = city.lat;
+      let lng = city.lng;
+      if (selectedPlace) {
+        lat = selectedPlace.lat;
+        lng = selectedPlace.lng;
+      } else {
+        try {
+          const [found] = await searchPlaces(locV, undefined, { lat: city.lat, lng: city.lng });
+          if (found) {
+            lat = found.lat;
+            lng = found.lng;
+          } else {
+            toast("Couldn't pinpoint that address", {
+              description: `Placed near ${city.name} center instead.`,
+            });
+          }
+        } catch {
+          // network hiccup — fall back to the city center silently
+        }
+      }
+
       await createActivity({
         host_id: user.id,
         title: titleV,
@@ -123,9 +181,8 @@ export const CreateTab = () => {
         category,
         location_name: locV,
         address: locV,
-        // For Phase 4 we use the city center; geocoding arrives in Phase 5.
-        lat: city.lat,
-        lng: city.lng,
+        lat,
+        lng,
         start_at: startISO,
         duration_min: duration,
         max_participants: maxParticipants,
@@ -247,16 +304,47 @@ export const CreateTab = () => {
         />
       </Field>
 
-      <Field label="Where" hint={`In ${city.name}`}>
-        <input
-          value={locationName}
-          onChange={(e) => setLocationName(e.target.value)}
-          placeholder="Eiserner Steg, Frankfurt"
-          required
-          maxLength={120}
-          className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-      </Field>
+      <div className="relative">
+        <Field label="Where" hint={selectedPlace ? "Pinned ✓" : `Near ${city.name}`}>
+          <input
+            value={locationName}
+            onChange={(e) => {
+              setLocationName(e.target.value);
+              setSelectedPlace(null);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            placeholder="Eiserner Steg, Frankfurt"
+            required
+            maxLength={120}
+            autoComplete="off"
+            className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </Field>
+        {showSuggestions && locationName.trim().length >= 3 && !selectedPlace && (
+          <div className="absolute left-0 right-0 top-full mt-1.5 z-20 rounded-2xl glass-strong shadow-float overflow-hidden max-h-64 overflow-y-auto">
+            {searchingPlace ? (
+              <div className="px-4 py-3 text-xs text-muted-foreground">Searching…</div>
+            ) : placeSuggestions.length === 0 ? (
+              <div className="px-4 py-3 text-xs text-muted-foreground">
+                No matches — you can still use this as a custom location
+              </div>
+            ) : (
+              placeSuggestions.map((place, i) => (
+                <button
+                  key={`${place.label}-${i}`}
+                  type="button"
+                  onClick={() => selectPlace(place)}
+                  className="w-full flex items-start gap-2 px-4 py-3 text-left text-sm hover:bg-white/20 transition-colors"
+                >
+                  <MapPin className="size-4 text-primary shrink-0 mt-0.5" aria-hidden />
+                  <span className="truncate">{place.label}</span>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Starts">
