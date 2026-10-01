@@ -138,6 +138,29 @@ export const createActivity = async (input: CreateActivityInput) => {
   return data;
 };
 
+export type UpdateActivityInput = Partial<{
+  title: string;
+  description: string | null;
+  category: CategoryKey;
+  location_name: string;
+  address: string | null;
+  lat: number;
+  lng: number;
+  start_at: string;
+  duration_min: number;
+  max_participants: number;
+  spontaneous: boolean;
+  cover_url: string | null;
+}>;
+
+export const updateActivity = async (activityId: string, input: UpdateActivityInput) => {
+  const { category, ...rest } = input;
+  const payload: Database["public"]["Tables"]["activities"]["Update"] = { ...rest };
+  if (category) payload.category = UI_TO_DB[category];
+  const { error } = await supabase.from("activities").update(payload).eq("id", activityId);
+  if (error) throw error;
+};
+
 export const joinActivity = async (activityId: string, userId: string) => {
   const { error } = await supabase
     .from("activity_participants")
