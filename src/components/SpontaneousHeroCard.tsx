@@ -1,6 +1,7 @@
-import { CATEGORIES, dicebearAvatar, type MockActivity } from "@/data/activities";
+import { CATEGORIES, type MockActivity } from "@/data/activities";
 import { Zap, Clock, MapPin } from "lucide-react";
 import { formatActivityTime } from "@/lib/format";
+import { Avatar } from "@/components/Avatar";
 
 type Props = {
   activity: MockActivity;
@@ -54,10 +55,11 @@ export const SpontaneousHeroCard = ({ activity, onClick }: Props) => {
 
       <div className="mt-4 flex items-center justify-between">
         <div className="flex -space-x-2">
-          <img
-            src={dicebearAvatar(activity.host.avatarSeed)}
-            alt={`${activity.host.displayName} avatar`}
-            className="size-8 rounded-full ring-2 ring-card bg-muted"
+          <Avatar
+            url={activity.host.avatarUrl}
+            seed={activity.host.avatarSeed}
+            size={32}
+            className="ring-2 ring-card"
           />
           <div className="size-8 rounded-full ring-2 ring-card bg-card/40 backdrop-blur grid place-items-center text-[11px] font-semibold text-accent-foreground">
             +{Math.max(0, activity.joined - 1)}

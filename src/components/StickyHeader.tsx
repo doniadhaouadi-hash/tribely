@@ -2,15 +2,11 @@ import { Bell, ChevronDown, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLocation } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
+import { Avatar } from "@/components/Avatar";
 
 export const StickyHeader = () => {
   const { city } = useLocation();
   const { user, profile } = useAuth();
-
-  const initial =
-    profile?.display_name?.trim()?.[0]?.toUpperCase() ??
-    user?.email?.[0]?.toUpperCase() ??
-    "T";
 
   return (
     <header className="sticky top-0 z-40 glass rounded-none">
@@ -45,17 +41,9 @@ export const StickyHeader = () => {
             <Link
               to="/?tab=you"
               aria-label="Your profile"
-              className="grid place-items-center size-9 rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-glow hover:scale-105 transition-transform ease-bounce overflow-hidden"
+              className="block rounded-full shadow-glow hover:scale-105 transition-transform ease-bounce"
             >
-              {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt=""
-                  className="size-full object-cover"
-                />
-              ) : (
-                <span>{initial}</span>
-              )}
+              <Avatar url={profile?.avatar_url} seed={user.id} sports={profile?.sports} size={36} />
             </Link>
           ) : (
             <Link

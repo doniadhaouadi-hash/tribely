@@ -274,6 +274,8 @@ export type Database = {
         | "swimming"
         | "climbing"
         | "dance"
+        | "coffee"
+        | "social"
         | "other"
       activity_status: "open" | "full" | "cancelled" | "completed"
       app_role: "user" | "host" | "admin"
@@ -418,6 +420,8 @@ export const Constants = {
         "swimming",
         "climbing",
         "dance",
+        "coffee",
+        "social",
         "other",
       ],
       activity_status: ["open", "full", "cancelled", "completed"],

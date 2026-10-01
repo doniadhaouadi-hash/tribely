@@ -18,6 +18,8 @@ const DB_TO_UI: Record<ActivityRow["category"], CategoryKey> = {
   swimming: "swimming",
   climbing: "climbing",
   dance: "dance_fitness",
+  coffee: "coffee",
+  social: "social",
   other: "other",
 };
 
@@ -33,6 +35,8 @@ const UI_TO_DB: Record<CategoryKey, ActivityRow["category"]> = {
   swimming: "swimming",
   climbing: "climbing",
   dance_fitness: "dance",
+  coffee: "coffee",
+  social: "social",
   other: "other",
 };
 
@@ -63,10 +67,12 @@ export const rowToActivity = (
   joined: row.participant_count,
   skillLevel: LEVEL_TO_SKILL[row.level_required],
   spontaneous: row.spontaneous,
+  coverUrl: row.cover_url ?? null,
   host: {
     id: row.host_id,
     displayName: host?.display_name?.trim() || "Host",
     avatarSeed: host?.id ?? row.host_id,
+    avatarUrl: host?.avatar_url ?? null,
     rating: host?.rating ? Number(host.rating) : 5,
   },
 });
@@ -85,6 +91,7 @@ export type CreateActivityInput = {
   duration_min: number;
   max_participants: number;
   spontaneous?: boolean;
+  cover_url?: string | null;
 };
 
 export const fetchActivitiesWithHosts = async (): Promise<MockActivity[]> => {
@@ -123,6 +130,7 @@ export const createActivity = async (input: CreateActivityInput) => {
       duration_min: input.duration_min,
       max_participants: input.max_participants,
       spontaneous: input.spontaneous ?? false,
+      cover_url: input.cover_url ?? null,
     })
     .select()
     .single();

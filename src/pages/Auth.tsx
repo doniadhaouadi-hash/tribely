@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,6 +60,30 @@ const Auth = () => {
       const msg =
         err instanceof z.ZodError
           ? err.errors[0]?.message ?? "Invalid input"
+          : err instanceof Error
+            ? err.message
+            : "Something went wrong";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    try {
+      const emailV = emailSchema.parse(email);
+      setSubmitting(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(emailV, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Password reset email sent", {
+        description: "Check your inbox for a link to set a new password.",
+      });
+    } catch (err) {
+      const msg =
+        err instanceof z.ZodError
+          ? "Enter your email above first"
           : err instanceof Error
             ? err.message
             : "Something went wrong";
@@ -176,6 +200,17 @@ const Auth = () => {
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
             />
 
+            {mode === "signin" && (
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={submitting || oauthLoading}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-60"
+              >
+                Forgot password?
+              </button>
+            )}
+
             <button
               type="submit"
               disabled={submitting || oauthLoading}
@@ -209,20 +244,37 @@ const Field = ({
   type?: string;
   placeholder?: string;
   autoComplete?: string;
-}) => (
-  <label className="block space-y-1.5">
-    <span className="text-xs font-medium text-muted-foreground">{label}</span>
-    <input
-      type={type}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      autoComplete={autoComplete}
-      required
-      className="w-full rounded-full glass px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
-    />
-  </label>
-);
+}) => {
+  const [visible, setVisible] = useState(false);
+  const isPassword = type === "password";
+
+  return (
+    <label className="block space-y-1.5">
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <div className="relative">
+        <input
+          type={isPassword && visible ? "text" : type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          required
+          className="w-full rounded-full glass px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setVisible((v) => !v)}
+            aria-label={visible ? "Hide password" : "Show password"}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 grid place-items-center size-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/20 transition-colors"
+          >
+            {visible ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+          </button>
+        )}
+      </div>
+    </label>
+  );
+};
 
 const GoogleIcon = () => (
   <svg className="size-4" viewBox="0 0 24 24" aria-hidden>

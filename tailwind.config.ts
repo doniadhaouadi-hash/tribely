@@ -63,6 +63,8 @@ export default {
           swimming: "hsl(var(--cat-swimming))",
           climbing: "hsl(var(--cat-climbing))",
           dance: "hsl(var(--cat-dance))",
+          coffee: "hsl(var(--cat-coffee))",
+          social: "hsl(var(--cat-social))",
           other: "hsl(var(--cat-other))",
         },
         sidebar: {

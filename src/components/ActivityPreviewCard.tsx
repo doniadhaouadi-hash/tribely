@@ -1,6 +1,7 @@
-import { CATEGORIES, dicebearAvatar, type MockActivity } from "@/data/activities";
+import { CATEGORIES, type MockActivity } from "@/data/activities";
 import { Clock, MapPin, Users, X, Zap } from "lucide-react";
 import { formatActivityTime } from "@/lib/format";
+import { Avatar } from "@/components/Avatar";
 
 type Props = {
   activity: MockActivity;
@@ -29,10 +30,14 @@ export const ActivityPreviewCard = ({ activity, onOpen, onClose }: Props) => {
         className="w-full text-left flex gap-3 p-3 pr-10"
       >
         <div
-          className="grid place-items-center size-14 shrink-0 rounded-2xl text-2xl"
-          style={{ background: `linear-gradient(135deg, ${tint}, hsl(var(--secondary)))` }}
+          className="grid place-items-center size-14 shrink-0 rounded-2xl text-2xl overflow-hidden"
+          style={activity.coverUrl ? undefined : { background: `linear-gradient(135deg, ${tint}, hsl(var(--secondary)))` }}
         >
-          <span aria-hidden>{cat.emoji}</span>
+          {activity.coverUrl ? (
+            <img src={activity.coverUrl} alt="" className="size-full object-cover" />
+          ) : (
+            <span aria-hidden>{cat.emoji}</span>
+          )}
         </div>
 
         <div className="min-w-0 flex-1 space-y-1">
@@ -60,10 +65,11 @@ export const ActivityPreviewCard = ({ activity, onOpen, onClose }: Props) => {
           </div>
         </div>
 
-        <img
-          src={dicebearAvatar(activity.host.avatarSeed)}
-          alt={`${activity.host.displayName} avatar`}
-          className="size-9 rounded-full self-end mb-1"
+        <Avatar
+          url={activity.host.avatarUrl}
+          seed={activity.host.avatarSeed}
+          size={36}
+          className="self-end mb-1"
         />
       </button>
 

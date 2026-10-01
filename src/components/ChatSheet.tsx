@@ -4,7 +4,8 @@ import { Loader2, Send, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { fetchMessages, sendMessage, type ChatMessage } from "@/lib/chatApi";
-import { dicebearAvatar, type MockActivity } from "@/data/activities";
+import type { MockActivity } from "@/data/activities";
+import { Avatar } from "@/components/Avatar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -126,11 +127,7 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
                       key={m.id}
                       className={cn("flex items-end gap-2", mine && "flex-row-reverse")}
                     >
-                      <img
-                        src={m.author?.avatar_url ?? dicebearAvatar(m.user_id)}
-                        alt=""
-                        className="size-8 rounded-full bg-muted shrink-0 object-cover"
-                      />
+                      <Avatar url={m.author?.avatar_url} seed={m.user_id} size={32} />
                       <div
                         className={cn(
                           "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm",
