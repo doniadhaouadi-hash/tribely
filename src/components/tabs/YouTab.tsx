@@ -92,7 +92,7 @@ export const YouTab = () => {
     load();
 
     const channel = supabase
-      .channel(`my-activities-${user.id}`)
+      .channel(`my-activities-${user.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "activity_participants", filter: `user_id=eq.${user.id}` },
