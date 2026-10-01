@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { CATEGORIES, dicebearAvatar, type MockActivity } from "@/data/activities";
+import { CATEGORIES, type MockActivity } from "@/data/activities";
+import { Avatar } from "@/components/Avatar";
 import {
   CalendarPlus,
   Check,
@@ -122,18 +123,27 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
             {/* Hero */}
             <div
               className="relative h-44 shrink-0"
-              style={{
-                background: `linear-gradient(135deg, ${tint} 0%, hsl(var(--secondary)) 130%)`,
-              }}
+              style={
+                activity.coverUrl
+                  ? undefined
+                  : { background: `linear-gradient(135deg, ${tint} 0%, hsl(var(--secondary)) 130%)` }
+              }
             >
-              <div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(120% 80% at 0% 0%, hsl(0 0% 100% / 0.25), transparent 60%)",
-                }}
-              />
+              {activity.coverUrl ? (
+                <>
+                  <img src={activity.coverUrl} alt="" className="absolute inset-0 size-full object-cover" />
+                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5" />
+                </>
+              ) : (
+                <div
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(120% 80% at 0% 0%, hsl(0 0% 100% / 0.25), transparent 60%)",
+                  }}
+                />
+              )}
               <div className="absolute top-2 left-1/2 -translate-x-1/2 h-1.5 w-12 rounded-full bg-card/40" />
 
               <button
@@ -187,11 +197,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
 
               {/* Host */}
               <section className="rounded-2xl glass p-3 flex items-center gap-3">
-                <img
-                  src={dicebearAvatar(activity.host.avatarSeed)}
-                  alt={`${activity.host.displayName} avatar`}
-                  className="size-12 rounded-full bg-card"
-                />
+                <Avatar url={activity.host.avatarUrl} seed={activity.host.avatarSeed} size={48} />
                 <div className="flex-1 min-w-0">
                   <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
                     Hosted by {isHost && <span className="text-primary">· You</span>}
@@ -234,11 +240,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
                           key={p.user_id}
                           className="flex flex-col items-center gap-1 shrink-0 w-14"
                         >
-                          <img
-                            src={p.avatar_url ?? dicebearAvatar(p.user_id)}
-                            alt={`${p.display_name} avatar`}
-                            className="size-12 rounded-full bg-muted ring-2 ring-card object-cover"
-                          />
+                          <Avatar url={p.avatar_url} seed={p.user_id} size={48} className="ring-2 ring-card" />
                           <span className="text-[10px] text-muted-foreground truncate w-full text-center">
                             {p.display_name.split(" ")[0]}
                           </span>

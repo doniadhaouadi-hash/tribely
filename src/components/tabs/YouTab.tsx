@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, Flame, Heart, Loader2, LogOut, Sparkles, Star, Trophy, User } from "lucide-react";
+import { Calendar, Camera, Flame, Heart, Loader2, LogOut, Sparkles, Star, Trophy, User } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { ActivityListCard } from "@/components/ActivityListCard";
 import { ActivityDetailSheet } from "@/components/ActivityDetailSheet";
 import { OnboardingSheet } from "@/components/OnboardingSheet";
+import { Avatar } from "@/components/Avatar";
 import { fetchFavoriteActivities, fetchMyActivities, type MyActivitiesBuckets } from "@/lib/myActivitiesApi";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadImage, UploadError } from "@/lib/uploadImage";
 import type { MockActivity } from "@/data/activities";
 import { cn } from "@/lib/utils";
 
@@ -21,13 +23,33 @@ const TABS: { key: Tab; label: string }[] = [
 ];
 
 export const YouTab = () => {
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, loading, signOut, refreshProfile } = useAuth();
   const [buckets, setBuckets] = useState<MyActivitiesBuckets>({ upcoming: [], hosted: [], past: [] });
   const [favorites, setFavorites] = useState<MockActivity[]>([]);
   const [loadingData, setLoadingData] = useState(false);
   const [tab, setTab] = useState<Tab>("upcoming");
   const [active, setActive] = useState<MockActivity | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    setUploadingAvatar(true);
+    try {
+      const url = await uploadImage(file, "avatars", user.id);
+      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+      if (error) throw error;
+      await refreshProfile();
+      toast.success("Profile photo updated");
+    } catch (err) {
+      toast.error(err instanceof UploadError ? err.message : "Couldn't upload photo");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   // Auto-prompt onboarding for fresh users
   useEffect(() => {
@@ -107,11 +129,6 @@ export const YouTab = () => {
     );
   }
 
-  const initial =
-    profile?.display_name?.trim()?.[0]?.toUpperCase() ??
-    user.email?.[0]?.toUpperCase() ??
-    "T";
-
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out");
@@ -135,12 +152,33 @@ export const YouTab = () => {
       <div className="space-y-6 pt-2">
         {/* Profile header */}
         <section className="rounded-2xl glass-strong shadow-soft p-5 flex items-center gap-4">
-          <div className="grid place-items-center size-16 rounded-full bg-gradient-primary text-primary-foreground font-bold text-2xl overflow-hidden shrink-0">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="size-full object-cover" />
-            ) : (
-              <span>{initial}</span>
-            )}
+          <div className="relative shrink-0">
+            <Avatar
+              url={profile?.avatar_url}
+              seed={user.id}
+              sports={profile?.sports}
+              size={64}
+            />
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              aria-label="Change profile photo"
+              className="absolute -bottom-1 -right-1 grid place-items-center size-7 rounded-full bg-primary text-primary-foreground border-2 border-background shadow-soft"
+            >
+              {uploadingAvatar ? (
+                <Loader2 className="size-3.5 animate-spin" aria-hidden />
+              ) : (
+                <Camera className="size-3.5" aria-hidden />
+              )}
+            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-display text-xl font-bold truncate">

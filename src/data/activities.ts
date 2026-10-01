@@ -60,8 +60,12 @@ export type MockActivity = {
   joined: number;
   skillLevel: SkillLevel;
   spontaneous: boolean;
-  host: { id: string; displayName: string; avatarSeed: string; rating: number };
+  coverUrl: string | null;
+  host: {
+    id: string;
+    displayName: string;
+    avatarSeed: string;
+    avatarUrl: string | null;
+    rating: number;
+  };
 };
-
-export const dicebearAvatar = (seed: string) =>
-  `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(seed)}`;

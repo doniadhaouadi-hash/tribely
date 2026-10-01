@@ -1,12 +1,13 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, Lock, Plus, Sparkles } from "lucide-react";
+import { ImagePlus, Loader2, Lock, Plus, Sparkles, X } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { CATEGORIES, type CategoryKey } from "@/data/activities";
 import { createActivity } from "@/lib/activitiesApi";
+import { uploadImage, UploadError } from "@/lib/uploadImage";
 
 const titleSchema = z.string().trim().min(3, "Min 3 characters").max(80);
 const descSchema = z.string().trim().max(500).optional();
@@ -36,6 +37,32 @@ export const CreateTab = () => {
   const [maxParticipants, setMaxParticipants] = useState(8);
   const [spontaneous, setSpontaneous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    setCoverPreview(URL.createObjectURL(file));
+    setUploadingCover(true);
+    try {
+      const url = await uploadImage(file, "activities", user.id);
+      setCoverUrl(url);
+    } catch (err) {
+      toast.error(err instanceof UploadError ? err.message : "Couldn't upload photo");
+      setCoverPreview(null);
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  const removeCover = () => {
+    setCoverPreview(null);
+    setCoverUrl(null);
+  };
 
   const cat = CATEGORIES[category];
   const tint = useMemo(() => `hsl(var(${cat.tintVar}))`, [cat]);
@@ -103,6 +130,7 @@ export const CreateTab = () => {
         duration_min: duration,
         max_participants: maxParticipants,
         spontaneous,
+        cover_url: coverUrl,
       });
 
       toast.success("Activity created 🎉", { description: titleV });
@@ -134,6 +162,45 @@ export const CreateTab = () => {
           Drop the basics — your tribe will join in seconds.
         </p>
       </header>
+
+      {/* Cover photo */}
+      <section className="space-y-2">
+        <Label>Cover photo (optional)</Label>
+        {coverPreview ? (
+          <div className="relative rounded-2xl overflow-hidden h-36">
+            <img src={coverPreview} alt="" className="size-full object-cover" />
+            {uploadingCover && (
+              <div className="absolute inset-0 bg-black/40 grid place-items-center">
+                <Loader2 className="size-6 text-white animate-spin" aria-hidden />
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={removeCover}
+              aria-label="Remove photo"
+              className="absolute top-2 right-2 grid place-items-center size-8 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+            >
+              <X className="size-4" aria-hidden />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => coverInputRef.current?.click()}
+            className="w-full h-28 rounded-2xl glass hover:bg-white/20 transition-colors flex flex-col items-center justify-center gap-1.5 text-muted-foreground"
+          >
+            <ImagePlus className="size-5" aria-hidden />
+            <span className="text-xs font-medium">Add a photo for your activity</span>
+          </button>
+        )}
+        <input
+          ref={coverInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleCoverChange}
+        />
+      </section>
 
       {/* Category picker */}
       <section className="space-y-2">
@@ -259,11 +326,11 @@ export const CreateTab = () => {
 
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || uploadingCover}
         className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary text-primary-foreground py-3.5 text-sm font-semibold shadow-glow hover:scale-[1.01] active:scale-[0.99] transition-transform ease-bounce disabled:opacity-60 disabled:hover:scale-100"
       >
         {submitting && <Loader2 className="size-4 animate-spin" aria-hidden />}
-        Create activity
+        {uploadingCover ? "Uploading photo…" : "Create activity"}
       </button>
     </form>
   );

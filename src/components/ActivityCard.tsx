@@ -1,6 +1,7 @@
-import { CATEGORIES, type CategoryKey, type MockActivity, dicebearAvatar } from "@/data/activities";
+import { CATEGORIES, type CategoryKey, type MockActivity } from "@/data/activities";
 import { Clock, MapPin, Users, Zap } from "lucide-react";
 import { formatActivityTime } from "@/lib/format";
+import { Avatar } from "@/components/Avatar";
 
 type Props = {
   activity: MockActivity;
@@ -18,21 +19,35 @@ export const ActivityCard = ({ activity, onClick }: Props) => {
       onClick={() => onClick?.(activity)}
       className="group w-full text-left rounded-2xl glass shadow-soft overflow-hidden transition-all duration-300 ease-smooth hover:shadow-float hover:-translate-y-0.5 active:scale-[0.99]"
     >
-      {/* Banner — category gradient */}
+      {/* Banner — cover photo if set, else category gradient */}
       <div
         className="relative h-24 overflow-hidden"
-        style={{
-          background: `linear-gradient(135deg, ${tint}, hsl(var(--secondary)))`,
-        }}
+        style={
+          activity.coverUrl
+            ? undefined
+            : { background: `linear-gradient(135deg, ${tint}, hsl(var(--secondary)))` }
+        }
       >
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-60"
-          style={{
-            background:
-              "radial-gradient(120% 80% at 0% 0%, hsl(0 0% 100% / 0.2), transparent 60%)",
-          }}
-        />
+        {activity.coverUrl ? (
+          <>
+            <img
+              src={activity.coverUrl}
+              alt=""
+              className="absolute inset-0 size-full object-cover"
+              loading="lazy"
+            />
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0" />
+          </>
+        ) : (
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-60"
+            style={{
+              background:
+                "radial-gradient(120% 80% at 0% 0%, hsl(0 0% 100% / 0.2), transparent 60%)",
+            }}
+          />
+        )}
         <div className="relative flex items-start justify-between p-3">
           <span
             className="rounded-full bg-card/95 backdrop-blur px-2.5 py-1 text-[11px] font-semibold flex items-center gap-1.5"
@@ -78,12 +93,12 @@ export const ActivityCard = ({ activity, onClick }: Props) => {
           </div>
 
           <div className="flex items-center gap-2">
-            <img
-              src={dicebearAvatar(activity.host.avatarSeed)}
-              alt={`${activity.host.displayName} avatar`}
-              className="size-7 rounded-full bg-muted ring-2"
+            <Avatar
+              url={activity.host.avatarUrl}
+              seed={activity.host.avatarSeed}
+              size={28}
+              className="ring-2"
               style={{ boxShadow: `inset 0 0 0 2px ${tintSoft}` }}
-              loading="lazy"
             />
           </div>
         </div>

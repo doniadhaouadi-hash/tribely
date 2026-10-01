@@ -25,6 +25,7 @@ type AuthContextValue = {
   profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -73,8 +74,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setProfile(null);
   };
 
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
+  };
+
   const value = useMemo(
-    () => ({ user, session, profile, loading, signOut }),
+    () => ({ user, session, profile, loading, signOut, refreshProfile }),
     [user, session, profile, loading],
   );
 
