@@ -13,6 +13,8 @@ export const CATEGORY_KEYS = [
   "swimming",
   "climbing",
   "dance_fitness",
+  "coffee",
+  "social",
   "other",
 ] as const;
 
@@ -42,6 +44,8 @@ export const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
   swimming:      { key: "swimming",      label: "Swimming",      emoji: "🏊", tintClass: "text-cat-swimming",   tintVar: "--cat-swimming" },
   climbing:      { key: "climbing",      label: "Climbing",      emoji: "🧗", tintClass: "text-cat-climbing",   tintVar: "--cat-climbing" },
   dance_fitness: { key: "dance_fitness", label: "Dance/Fitness", emoji: "🕺", tintClass: "text-cat-dance",      tintVar: "--cat-dance" },
+  coffee:        { key: "coffee",        label: "Coffee",        emoji: "☕", tintClass: "text-cat-coffee",     tintVar: "--cat-coffee" },
+  social:        { key: "social",        label: "Socializing",   emoji: "🎉", tintClass: "text-cat-social",     tintVar: "--cat-social" },
   other:         { key: "other",         label: "Other",         emoji: "✨", tintClass: "text-cat-other",      tintVar: "--cat-other" },
 };
 

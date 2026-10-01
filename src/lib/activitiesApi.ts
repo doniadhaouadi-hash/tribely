@@ -18,6 +18,8 @@ const DB_TO_UI: Record<ActivityRow["category"], CategoryKey> = {
   swimming: "swimming",
   climbing: "climbing",
   dance: "dance_fitness",
+  coffee: "coffee",
+  social: "social",
   other: "other",
 };
 
@@ -33,6 +35,8 @@ const UI_TO_DB: Record<CategoryKey, ActivityRow["category"]> = {
   swimming: "swimming",
   climbing: "climbing",
   dance_fitness: "dance",
+  coffee: "coffee",
+  social: "social",
   other: "other",
 };
 

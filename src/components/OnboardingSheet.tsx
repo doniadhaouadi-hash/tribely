@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { ArrowRight, Check, Loader2 } from "lucide-react";
+import { ArrowRight, Camera, Check, Loader2 } from "lucide-react";
 import { CATEGORIES, CATEGORY_KEYS, type CategoryKey } from "@/data/activities";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { Avatar } from "@/components/Avatar";
+import { uploadImage, UploadError } from "@/lib/uploadImage";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +27,9 @@ export const OnboardingSheet = ({ open, onClose }: Props) => {
   const { user, profile } = useAuth();
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [displayName, setDisplayName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [sports, setSports] = useState<Set<CategoryKey>>(new Set());
   const [level, setLevel] = useState<Level>("beginner");
   const [saving, setSaving] = useState(false);
@@ -32,11 +37,30 @@ export const OnboardingSheet = ({ open, onClose }: Props) => {
   useEffect(() => {
     if (open && profile) {
       setDisplayName(profile.display_name ?? "");
+      setAvatarUrl(profile.avatar_url ?? null);
       setSports(new Set((profile.sports ?? []) as CategoryKey[]));
       setLevel((profile.level as Level) ?? "beginner");
       setStep(0);
     }
   }, [open, profile]);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    setUploadingAvatar(true);
+    try {
+      const url = await uploadImage(file, "avatars", user.id);
+      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+      if (error) throw error;
+      setAvatarUrl(url);
+      toast.success("Profile photo added");
+    } catch (err) {
+      toast.error(err instanceof UploadError ? err.message : "Couldn't upload photo");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const toggleSport = (k: CategoryKey) => {
     setSports((prev) => {
@@ -117,6 +141,41 @@ export const OnboardingSheet = ({ open, onClose }: Props) => {
                     This is how the tribe will recognise you.
                   </p>
                 </header>
+
+                <div className="flex flex-col items-center gap-2">
+                  <div className="relative">
+                    <Avatar url={avatarUrl} seed={user?.id ?? "me"} sports={Array.from(sports)} size={88} />
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      aria-label="Add profile photo"
+                      className="absolute -bottom-1 -right-1 grid place-items-center size-8 rounded-full bg-primary text-primary-foreground border-2 border-background shadow-soft"
+                    >
+                      {uploadingAvatar ? (
+                        <Loader2 className="size-4 animate-spin" aria-hidden />
+                      ) : (
+                        <Camera className="size-4" aria-hidden />
+                      )}
+                    </button>
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarChange}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {avatarUrl ? "Change photo" : "Add a photo (optional)"}
+                  </button>
+                </div>
+
                 <input
                   type="text"
                   value={displayName}
