@@ -10,12 +10,14 @@ import {
   Loader2,
   LogIn,
   MapPin,
+  Pencil,
   Share2,
   Star,
   Users,
   X,
   Zap,
 } from "lucide-react";
+import { EditActivitySheet } from "@/components/EditActivitySheet";
 import { Link } from "react-router-dom";
 import { formatActivityTime } from "@/lib/format";
 import { toast } from "sonner";
@@ -44,6 +46,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
   const [participants, setParticipants] = useState<ParticipantWithProfile[]>([]);
   const [loadingParts, setLoadingParts] = useState(false);
   const [acting, setActing] = useState(false);
+  const [editing, setEditing] = useState(false);
   const favorited = !!activity && favoriteIds.has(activity.id);
 
   const open = !!activity;
@@ -113,6 +116,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
   };
 
   return (
+    <>
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
@@ -287,9 +291,13 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
                   <LogIn className="size-4" aria-hidden /> Sign in to join
                 </Link>
               ) : isHost ? (
-                <div className="w-full text-center text-xs text-muted-foreground py-2">
-                  You're the host — manage from the You tab (Phase 5).
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-full glass-strong text-foreground py-3.5 text-sm font-semibold hover:bg-white/20 transition-colors"
+                >
+                  <Pencil className="size-4" aria-hidden /> Edit activity
+                </button>
               ) : (
                 <button
                   type="button"
@@ -318,6 +326,11 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
         )}
       </SheetContent>
     </Sheet>
+    <EditActivitySheet
+      activity={editing ? activity : null}
+      onOpenChange={(o) => !o && setEditing(false)}
+    />
+    </>
   );
 };
 

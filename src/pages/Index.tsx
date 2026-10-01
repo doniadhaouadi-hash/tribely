@@ -43,6 +43,14 @@ const Index = () => {
     }
   }, [activityParam, activities, searchParams, setSearchParams]);
 
+  // Keep the open detail sheet in sync after an edit (or any realtime update).
+  useEffect(() => {
+    setActiveActivity((prev) => {
+      if (!prev) return prev;
+      return activities.find((a) => a.id === prev.id) ?? prev;
+    });
+  }, [activities]);
+
   const setActiveTab = (tab: TabKey) => {
     const next = new URLSearchParams(searchParams);
     next.set("tab", tab);
