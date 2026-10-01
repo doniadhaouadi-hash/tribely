@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, MailCheck } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,8 @@ const Auth = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  /** Set after sign-up when Supabase requires email confirmation (no session yet). */
+  const [confirmEmail, setConfirmEmail] = useState<string | null>(null);
 
   if (!loading && user) return <Navigate to={redirectTo} replace />;
 
@@ -42,7 +44,7 @@ const Auth = () => {
 
       if (mode === "signup") {
         const nameV = nameSchema.parse(name);
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: emailV,
           password: passV,
           options: {
@@ -51,10 +53,14 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast.success("Welcome to Tribely!", {
-          description: "Check your inbox to confirm your email.",
-        });
-        navigate(redirectTo);
+        if (data.session) {
+          // Email auto-confirm is on: the user is already signed in.
+          toast.success("Welcome to Tribely!");
+          navigate(redirectTo);
+        } else {
+          // Email confirmation required: no session until the link is clicked.
+          setConfirmEmail(emailV);
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: emailV,
@@ -143,6 +149,31 @@ const Auth = () => {
           <p className="text-muted-foreground text-sm">Find your tribe. Move together.</p>
         </div>
 
+        {confirmEmail ? (
+          <div className="rounded-3xl glass-strong shadow-float p-6 space-y-4 text-center">
+            <div className="mx-auto grid place-items-center size-14 rounded-full bg-primary/15">
+              <MailCheck className="size-7 text-primary" aria-hidden />
+            </div>
+            <div className="space-y-1.5">
+              <h2 className="font-display text-xl font-bold">Check your inbox</h2>
+              <p className="text-sm text-muted-foreground">
+                We sent a confirmation link to{" "}
+                <span className="font-medium text-foreground break-all">{confirmEmail}</span>.
+                Open it to finish signing up.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setConfirmEmail(null);
+                setMode("signin");
+              }}
+              className="w-full rounded-full glass px-4 py-3 text-sm font-medium text-foreground hover:bg-white/20 transition-colors"
+            >
+              Back to sign in
+            </button>
+          </div>
+        ) : (
         <div className="rounded-3xl glass-strong shadow-float p-6 space-y-5">
           <div className="grid grid-cols-2 rounded-full bg-muted p-1 text-sm font-medium">
             {(["signin", "signup"] as const).map((m) => (
@@ -233,6 +264,7 @@ const Auth = () => {
             </button>
           </form>
         </div>
+        )}
 
         <p className="text-center text-xs text-muted-foreground">
           By continuing you agree to Tribely's terms & privacy.
