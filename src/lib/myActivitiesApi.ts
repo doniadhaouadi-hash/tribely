@@ -1,6 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import { rowToActivity } from "@/lib/activitiesApi";
 import type { MockActivity } from "@/data/activities";
+import type { Database } from "@/integrations/supabase/types";
+
+type ActivityRow = Database["public"]["Tables"]["activities"]["Row"];
 
 export type MyActivitiesBuckets = {
   upcoming: MockActivity[];
@@ -8,7 +11,7 @@ export type MyActivitiesBuckets = {
   past: MockActivity[];
 };
 
-const enrichWithHosts = async (rows: any[]): Promise<MockActivity[]> => {
+const enrichWithHosts = async (rows: ActivityRow[]): Promise<MockActivity[]> => {
   if (!rows.length) return [];
   const hostIds = Array.from(new Set(rows.map((r) => r.host_id)));
   const { data: hosts } = await supabase
@@ -40,7 +43,7 @@ export const fetchMyActivities = async (userId: string): Promise<MyActivitiesBuc
   if (partsError) throw partsError;
 
   const joinedIds = (parts ?? []).map((p) => p.activity_id);
-  let joinedRows: any[] = [];
+  let joinedRows: ActivityRow[] = [];
   if (joinedIds.length) {
     const { data, error } = await supabase
       .from("activities")
@@ -52,11 +55,11 @@ export const fetchMyActivities = async (userId: string): Promise<MyActivitiesBuc
   }
 
   // Combine for upcoming/past split, dedupe (host can be in both)
-  const all = new Map<string, any>();
+  const all = new Map<string, ActivityRow>();
   [...(hostedRows ?? []), ...joinedRows].forEach((r) => all.set(r.id, r));
 
-  const upcoming: any[] = [];
-  const past: any[] = [];
+  const upcoming: ActivityRow[] = [];
+  const past: ActivityRow[] = [];
   Array.from(all.values()).forEach((r) => {
     if (r.start_at >= nowIso) upcoming.push(r);
     else past.push(r);
