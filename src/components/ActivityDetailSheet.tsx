@@ -34,6 +34,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { downloadIcs } from "@/lib/calendar";
 import { shareActivity } from "@/lib/share";
 import { authLink } from "@/lib/redirect";
+import { errorMessage } from "@/lib/errors";
 
 type Props = {
   activity: MockActivity | null;
@@ -88,7 +89,9 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
       const next = await fetchParticipants(activity.id);
       setParticipants(next);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Action failed");
+      // The server rejects joins to full/closed activities (QA-005).
+      toast.error(errorMessage(e, "Action failed"));
+      fetchParticipants(activity.id).then(setParticipants).catch(() => {});
     } finally {
       setActing(false);
     }
