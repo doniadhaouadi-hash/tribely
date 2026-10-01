@@ -218,7 +218,8 @@ export const YouTab = () => {
         {/* Stats */}
         <section className="grid grid-cols-3 gap-3">
           <Stat icon={Flame} label="Streak" value={profile?.streak_count ?? 0} />
-          <Stat icon={Trophy} label="Hosted" value={profile?.hosted_count ?? buckets.hosted.length} />
+          {/* profiles.hosted_count is never maintained; count the real hosted activities. */}
+          <Stat icon={Trophy} label="Hosted" value={buckets.hosted.length} />
           <Stat
             icon={Star}
             label="Rating"
