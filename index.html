@@ -3,8 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f7f7ed" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0f1a13" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f5f6fc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141225" media="(prefers-color-scheme: dark)" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('tribely-theme');
+          var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (isDark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
     <title>Tribely — Find your tribe. Move together.</title>
     <meta name="description" content="Find, join or host local sports activities. Tribely connects movers in your city — running, yoga, football, climbing &amp; more.">
     <meta name="author" content="Tribely" />

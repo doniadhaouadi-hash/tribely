@@ -91,65 +91,46 @@
     --sidebar-ring: 247 87% 73%;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --background: 240 30% 8%;
-      --foreground: 230 40% 95%;
-      --card: 240 22% 11%;
-      --card-foreground: 230 40% 95%;
-      --popover: 240 22% 11%;
-      --popover-foreground: 230 40% 95%;
-      --muted: 240 18% 16%;
-      --muted-foreground: 230 15% 65%;
-      --border: 240 18% 20%;
-      --input: 240 18% 16%;
-      --primary: 247 90% 76%;
-      --primary-foreground: 240 25% 14%;
-      --secondary: 230 40% 92%;
-      --secondary-foreground: 240 25% 14%;
-      --accent: 171 65% 48%;
-      --accent-foreground: 240 25% 12%;
-      --ring: 247 90% 76%;
-
-      --glass: 240 22% 16%;
-      --glass-border: 230 25% 55%;
-
-      --gradient-card: linear-gradient(135deg, hsl(240 22% 12%), hsl(240 30% 9%));
-      --gradient-hero: linear-gradient(180deg, transparent, hsl(240 30% 6% / 0.85));
-      --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
-      --shadow-float: 0 8px 24px hsl(0 0% 0% / 0.45);
-      --shadow-glow: 0 0 24px hsl(247 90% 76% / 0.4);
-
-      --sidebar-background: 240 30% 8%;
-      --sidebar-foreground: 230 40% 95%;
-      --sidebar-accent: 240 18% 16%;
-      --sidebar-accent-foreground: 230 40% 95%;
-      --sidebar-border: 240 18% 20%;
-    }
-  }
-
-  /* Manual override class — kept available */
+  /* Dark mode — same brand violet/teal gradient as light mode, just set
+     against a deep indigo base instead of a light one. Toggled via the
+     .dark class (see useTheme); the class is the single source of truth
+     so it can't conflict with the OS-level color-scheme preference. */
   .dark {
-    --background: 240 30% 8%;
-    --foreground: 230 40% 95%;
-    --card: 240 22% 11%;
-    --card-foreground: 230 40% 95%;
-    --popover: 240 22% 11%;
-    --popover-foreground: 230 40% 95%;
-    --muted: 240 18% 16%;
-    --muted-foreground: 230 15% 65%;
-    --border: 240 18% 20%;
-    --input: 240 18% 16%;
-    --primary: 247 90% 76%;
+    --background: 248 35% 11%;
+    --foreground: 253 47% 96%;
+    --card: 247 33% 16%;
+    --card-foreground: 253 47% 96%;
+    --popover: 247 33% 16%;
+    --popover-foreground: 253 47% 96%;
+    --muted: 247 22% 18%;
+    --muted-foreground: 247 22% 69%;
+    --border: 247 22% 22%;
+    --input: 247 22% 18%;
+    --primary: 247 87% 73%;
     --primary-foreground: 240 25% 14%;
     --secondary: 230 40% 92%;
     --secondary-foreground: 240 25% 14%;
-    --accent: 171 65% 48%;
-    --accent-foreground: 240 25% 12%;
-    --ring: 247 90% 76%;
+    --accent: 171 77% 64%;
+    --accent-foreground: 240 25% 14%;
+    --ring: 247 87% 73%;
 
-    --glass: 240 22% 16%;
-    --glass-border: 230 25% 55%;
+    --glass: 247 33% 16%;
+    --glass-border: 0 0% 100%;
+
+    --gradient-card: linear-gradient(135deg, hsl(247 33% 13%), hsl(248 35% 9%));
+    --gradient-hero: linear-gradient(180deg, transparent, hsl(248 35% 7% / 0.85));
+    --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
+    --shadow-float: 0 8px 24px hsl(0 0% 0% / 0.45);
+    --shadow-glow: 0 0 24px hsl(247 87% 73% / 0.45);
+
+    --sidebar-background: 248 35% 11%;
+    --sidebar-foreground: 253 47% 96%;
+    --sidebar-primary: 247 87% 73%;
+    --sidebar-primary-foreground: 240 25% 14%;
+    --sidebar-accent: 247 22% 18%;
+    --sidebar-accent-foreground: 253 47% 96%;
+    --sidebar-border: 247 22% 22%;
+    --sidebar-ring: 247 87% 73%;
   }
 }
 
