@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ImagePlus, Loader2, Lock, MapPin, Plus, Sparkles, X } from "lucide-react";
+import { ImagePlus, Loader2, Lock, Plus, Sparkles, X } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -8,6 +8,7 @@ import { useLocation } from "@/context/LocationContext";
 import { CATEGORIES, type CategoryKey } from "@/data/activities";
 import { createActivity, SKILL_TO_LEVEL, type PickableSkillLevel } from "@/lib/activitiesApi";
 import { LevelPicker } from "@/components/LevelPicker";
+import { PlaceSuggestions } from "@/components/PlaceSuggestions";
 import { uploadImage, UploadError } from "@/lib/uploadImage";
 import { clampLocation, MAX_LOCATION_LENGTH, searchPlaces, type GeoPlace } from "@/lib/geocode";
 
@@ -321,7 +322,7 @@ export const CreateTab = () => {
               setSelectedPlace(null);
             }}
             onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            onBlur={() => setShowSuggestions(false)}
             placeholder="Eiserner Steg, Frankfurt"
             required
             maxLength={MAX_LOCATION_LENGTH}
@@ -330,27 +331,11 @@ export const CreateTab = () => {
           />
         </Field>
         {showSuggestions && locationName.trim().length >= 3 && !selectedPlace && (
-          <div className="absolute left-0 right-0 top-full mt-1.5 z-20 rounded-2xl glass-strong shadow-float overflow-hidden max-h-64 overflow-y-auto">
-            {searchingPlace ? (
-              <div className="px-4 py-3 text-xs text-muted-foreground">Searching…</div>
-            ) : placeSuggestions.length === 0 ? (
-              <div className="px-4 py-3 text-xs text-muted-foreground">
-                No matches — you can still use this as a custom location
-              </div>
-            ) : (
-              placeSuggestions.map((place, i) => (
-                <button
-                  key={`${place.label}-${i}`}
-                  type="button"
-                  onClick={() => selectPlace(place)}
-                  className="w-full flex items-start gap-2 px-4 py-3 text-left text-sm hover:bg-white/20 transition-colors"
-                >
-                  <MapPin className="size-4 text-primary shrink-0 mt-0.5" aria-hidden />
-                  <span className="truncate">{place.label}</span>
-                </button>
-              ))
-            )}
-          </div>
+          <PlaceSuggestions
+            searching={searchingPlace}
+            places={placeSuggestions}
+            onSelect={selectPlace}
+          />
         )}
       </div>
 

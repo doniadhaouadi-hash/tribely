@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Ban, ImagePlus, Loader2, MapPin, Sparkles, X } from "lucide-react";
+import { Ban, ImagePlus, Loader2, Sparkles, X } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useLocation } from "@/context/LocationContext";
@@ -25,6 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { LevelPicker } from "@/components/LevelPicker";
+import { PlaceSuggestions } from "@/components/PlaceSuggestions";
 import { uploadImage, UploadError } from "@/lib/uploadImage";
 import { clampLocation, MAX_LOCATION_LENGTH, searchPlaces, type GeoPlace } from "@/lib/geocode";
 
@@ -357,7 +358,7 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved, onCancelled
                       setSelectedPlace(null);
                     }}
                     onFocus={() => setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                    onBlur={() => setShowSuggestions(false)}
                     required
                     maxLength={MAX_LOCATION_LENGTH}
                     autoComplete="off"
@@ -365,27 +366,11 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved, onCancelled
                   />
                 </Field>
                 {showSuggestions && locationName.trim().length >= 3 && !selectedPlace && (
-                  <div className="absolute left-0 right-0 top-full mt-1.5 z-20 rounded-2xl glass-strong shadow-float overflow-hidden max-h-64 overflow-y-auto">
-                    {searchingPlace ? (
-                      <div className="px-4 py-3 text-xs text-muted-foreground">Searching…</div>
-                    ) : placeSuggestions.length === 0 ? (
-                      <div className="px-4 py-3 text-xs text-muted-foreground">
-                        No matches — you can still use this as a custom location
-                      </div>
-                    ) : (
-                      placeSuggestions.map((place, i) => (
-                        <button
-                          key={`${place.label}-${i}`}
-                          type="button"
-                          onClick={() => selectPlace(place)}
-                          className="w-full flex items-start gap-2 px-4 py-3 text-left text-sm hover:bg-white/20 transition-colors"
-                        >
-                          <MapPin className="size-4 text-primary shrink-0 mt-0.5" aria-hidden />
-                          <span className="truncate">{place.label}</span>
-                        </button>
-                      ))
-                    )}
-                  </div>
+                  <PlaceSuggestions
+                    searching={searchingPlace}
+                    places={placeSuggestions}
+                    onSelect={selectPlace}
+                  />
                 )}
               </div>
 
