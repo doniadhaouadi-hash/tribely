@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
-import { Globe, LocateFixed } from "lucide-react";
+import { Globe, Loader2, LocateFixed } from "lucide-react";
+import { toast } from "sonner";
 import { useActivities } from "@/hooks/useActivities";
 import type { CategoryKey, MockActivity } from "@/data/activities";
 import { useLocation } from "@/context/LocationContext";
+import { reverseGeocodeCity } from "@/lib/geocode";
 import { CategoryFilterRow } from "@/components/CategoryFilterRow";
 import { createCategoryMarker } from "@/lib/mapMarker";
 import { ActivityPreviewCard } from "@/components/ActivityPreviewCard";
@@ -21,10 +23,11 @@ const RecenterOnCity = ({ lat, lng }: { lat: number; lng: number }) => {
 };
 
 export const MapTab = ({ onOpenActivity }: Props) => {
-  const { city } = useLocation();
+  const { city, setCity, openPicker } = useLocation();
   const { activities } = useActivities();
   const [category, setCategory] = useState<CategoryKey | "all">("all");
   const [selected, setSelected] = useState<MockActivity | null>(null);
+  const [locating, setLocating] = useState(false);
 
   const filtered = useMemo(
     () =>
@@ -39,10 +42,34 @@ export const MapTab = ({ onOpenActivity }: Props) => {
   }, [filtered, selected]);
 
   const handleMyLocation = () => {
-    if (!("geolocation" in navigator)) return;
+    if (!("geolocation" in navigator)) {
+      toast.error("Geolocation isn't available on this device");
+      return;
+    }
+    setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      () => {},
-      () => {},
+      async (pos) => {
+        try {
+          const found = await reverseGeocodeCity(pos.coords.latitude, pos.coords.longitude);
+          setCity(
+            found
+              ? { name: found.label, country: found.country, countryCode: found.countryCode, lat: found.lat, lng: found.lng }
+              : {
+                  name: "My location",
+                  country: "",
+                  countryCode: "",
+                  lat: pos.coords.latitude,
+                  lng: pos.coords.longitude,
+                },
+          );
+        } finally {
+          setLocating(false);
+        }
+      },
+      () => {
+        toast.error("Couldn't get your location — check location permissions");
+        setLocating(false);
+      },
       { enableHighAccuracy: true, timeout: 8000 },
     );
   };
@@ -57,9 +84,10 @@ export const MapTab = ({ onOpenActivity }: Props) => {
         className="absolute inset-0 z-0"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maxZoom={19}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          maxZoom={20}
+          detectRetina
         />
         <RecenterOnCity lat={city.lat} lng={city.lng} />
         {filtered.map((a) => (
@@ -87,6 +115,7 @@ export const MapTab = ({ onOpenActivity }: Props) => {
 
       <button
         type="button"
+        onClick={openPicker}
         aria-label="Change location"
         className="absolute top-20 right-3 z-10 grid place-items-center size-11 rounded-full glass-strong text-foreground shadow-float hover:scale-105 active:scale-95 transition-transform ease-bounce"
       >
@@ -96,10 +125,15 @@ export const MapTab = ({ onOpenActivity }: Props) => {
       <button
         type="button"
         onClick={handleMyLocation}
+        disabled={locating}
         aria-label="Use my location"
-        className="absolute bottom-28 right-3 z-10 grid place-items-center size-11 rounded-full glass-strong text-foreground shadow-float hover:scale-105 active:scale-95 transition-transform ease-bounce"
+        className="absolute bottom-28 right-3 z-10 grid place-items-center size-11 rounded-full glass-strong text-foreground shadow-float hover:scale-105 active:scale-95 transition-transform ease-bounce disabled:opacity-60"
       >
-        <LocateFixed className="size-5 text-primary" aria-hidden />
+        {locating ? (
+          <Loader2 className="size-5 text-primary animate-spin" aria-hidden />
+        ) : (
+          <LocateFixed className="size-5 text-primary" aria-hidden />
+        )}
       </button>
 
       {selected && (
