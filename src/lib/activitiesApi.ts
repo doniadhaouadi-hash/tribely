@@ -94,11 +94,19 @@ export type CreateActivityInput = {
   cover_url?: string | null;
 };
 
+/** Activities that started less than this long ago still show in the feed. */
+export const FEED_GRACE_MS = 30 * 60_000;
+
+/** Earliest start time an activity may have to appear in the feed / on the map. */
+export const feedStartCutoff = (nowMs = Date.now()) =>
+  new Date(nowMs - FEED_GRACE_MS).toISOString();
+
 export const fetchActivitiesWithHosts = async (): Promise<MockActivity[]> => {
   const { data: rows, error } = await supabase
     .from("activities")
     .select("*")
-    .neq("status", "cancelled")
+    .not("status", "in", "(cancelled,completed)")
+    .gte("start_at", feedStartCutoff())
     .order("start_at", { ascending: true });
   if (error) throw error;
   if (!rows || rows.length === 0) return [];

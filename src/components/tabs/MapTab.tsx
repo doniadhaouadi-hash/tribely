@@ -10,6 +10,7 @@ import { CategoryFilterRow } from "@/components/CategoryFilterRow";
 import { createCategoryMarker } from "@/lib/mapMarker";
 import { ActivityPreviewCard } from "@/components/ActivityPreviewCard";
 import { LoadError } from "@/components/LoadError";
+import { FEED_GRACE_MS } from "@/lib/activitiesApi";
 
 type Props = {
   onOpenActivity?: (a: MockActivity) => void;
@@ -30,11 +31,14 @@ export const MapTab = ({ onOpenActivity }: Props) => {
   const [selected, setSelected] = useState<MockActivity | null>(null);
   const [locating, setLocating] = useState(false);
 
-  const filtered = useMemo(
-    () =>
-      activities.filter((a) => (category === "all" ? true : a.category === category)),
-    [activities, category],
-  );
+  const filtered = useMemo(() => {
+    // The feed query already drops past activities; this also hides ones that
+    // ran past the grace window while the page stayed open.
+    const minStart = Date.now() - FEED_GRACE_MS;
+    return activities
+      .filter((a) => new Date(a.startsAt).getTime() >= minStart)
+      .filter((a) => (category === "all" ? true : a.category === category));
+  }, [activities, category]);
 
   useEffect(() => {
     if (selected && !filtered.some((a) => a.id === selected.id)) {

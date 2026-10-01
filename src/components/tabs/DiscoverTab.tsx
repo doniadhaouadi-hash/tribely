@@ -17,6 +17,7 @@ import {
   type DiscoverFilters,
 } from "@/components/FilterSheet";
 import { distanceKm } from "@/lib/distance";
+import { FEED_GRACE_MS } from "@/lib/activitiesApi";
 
 type Props = {
   onOpenActivity?: (a: MockActivity) => void;
@@ -52,7 +53,7 @@ export const DiscoverTab = ({ onOpenActivity, onSwitchToMap, onHostClick }: Prop
       .filter((a) => (filters.spontaneousOnly ? a.spontaneous : true))
       .filter((a) => {
         const t = new Date(a.startsAt).getTime();
-        return t >= nowMs - 30 * 60_000 && t <= cutoffMs;
+        return t >= nowMs - FEED_GRACE_MS && t <= cutoffMs;
       });
 
     // sort
