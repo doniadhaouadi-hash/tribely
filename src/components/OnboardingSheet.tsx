@@ -111,6 +111,7 @@ export const OnboardingSheet = ({ open, onClose }: Props) => {
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent
+        title="Complete your profile"
         side="bottom"
         className="p-0 max-h-[92vh] h-[92vh] rounded-t-[2rem] border-0 bg-card overflow-hidden"
       >

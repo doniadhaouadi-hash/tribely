@@ -84,6 +84,8 @@ export const LocationPickerSheet = () => {
   return (
     <Sheet open={pickerOpen} onOpenChange={(o) => !o && closePicker()}>
       <SheetContent
+        title="Change location"
+        hideClose
         side="bottom"
         className="p-0 max-h-[80vh] rounded-t-[2rem] border-0 bg-card overflow-hidden"
       >

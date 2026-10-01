@@ -80,6 +80,8 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
+        title={activity ? `Chat: ${activity.title}` : "Chat"}
+        hideClose
         side="bottom"
         className="p-0 max-h-[92vh] h-[92vh] rounded-t-[2rem] border-0 bg-card overflow-hidden"
       >

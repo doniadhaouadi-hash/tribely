@@ -56,6 +56,8 @@ export const FilterSheet = ({ open, onOpenChange, value, onChange }: Props) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
+        title="Filters"
+        hideClose
         side="bottom"
         className="p-0 max-h-[85vh] rounded-t-[2rem] border-0 bg-card overflow-hidden"
       >
