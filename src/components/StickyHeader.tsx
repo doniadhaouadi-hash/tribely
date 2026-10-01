@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, MapPin, Moon, Sun } from "lucide-react";
+import { ChevronDown, MapPin, Moon, Sun } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLocation } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
@@ -43,14 +43,6 @@ export const StickyHeader = () => {
             ) : (
               <Moon className="size-5 text-foreground" aria-hidden />
             )}
-          </button>
-
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative grid place-items-center size-10 rounded-full glass hover:bg-white/20 transition-colors"
-          >
-            <Bell className="size-5 text-foreground" aria-hidden />
           </button>
 
           {user ? (
