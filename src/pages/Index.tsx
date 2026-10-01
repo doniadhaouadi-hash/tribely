@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { StickyHeader } from "@/components/StickyHeader";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { GlassBackground } from "@/components/GlassBackground";
 import { DiscoverTab } from "@/components/tabs/DiscoverTab";
-import { MapTab } from "@/components/tabs/MapTab";
+import { Loader2 } from "lucide-react";
 import { CreateTab } from "@/components/tabs/CreateTab";
 import { ChatTab } from "@/components/tabs/ChatTab";
 import { YouTab } from "@/components/tabs/YouTab";
@@ -15,6 +15,17 @@ import { useActivities } from "@/hooks/useActivities";
 import { fetchActivityById } from "@/lib/activitiesApi";
 import { toast } from "sonner";
 import type { MockActivity } from "@/data/activities";
+
+// Leaflet is only needed on the Map tab, so it lives in its own chunk.
+const MapTab = lazy(() =>
+  import("@/components/tabs/MapTab").then((m) => ({ default: m.MapTab })),
+);
+
+const TabFallback = () => (
+  <div className="pt-16 grid place-items-center text-muted-foreground">
+    <Loader2 className="size-6 animate-spin" aria-hidden />
+  </div>
+);
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -93,7 +104,11 @@ const Index = () => {
           />
         );
       case "map":
-        return <MapTab onOpenActivity={handleOpenActivity} />;
+        return (
+          <Suspense fallback={<TabFallback />}>
+            <MapTab onOpenActivity={handleOpenActivity} />
+          </Suspense>
+        );
       case "create":   return <CreateTab />;
       case "chat":     return <ChatTab />;
       case "you":      return <YouTab />;

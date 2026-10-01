@@ -19,4 +19,21 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Long-lived vendor chunks: better caching and no single >500 kB bundle.
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom"],
+          supabase: ["@supabase/supabase-js"],
+          radix: [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-alert-dialog",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-toast",
+          ],
+        },
+      },
+    },
+  },
 }));
