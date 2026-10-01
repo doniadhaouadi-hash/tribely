@@ -9,11 +9,15 @@ import { CATEGORIES, type CategoryKey } from "@/data/activities";
 import { createActivity, SKILL_TO_LEVEL, type PickableSkillLevel } from "@/lib/activitiesApi";
 import { LevelPicker } from "@/components/LevelPicker";
 import { uploadImage, UploadError } from "@/lib/uploadImage";
-import { searchPlaces, type GeoPlace } from "@/lib/geocode";
+import { clampLocation, MAX_LOCATION_LENGTH, searchPlaces, type GeoPlace } from "@/lib/geocode";
 
 const titleSchema = z.string().trim().min(3, "Min 3 characters").max(80);
 const descSchema = z.string().trim().max(500).optional();
-const locationSchema = z.string().trim().min(2, "Required").max(120);
+const locationSchema = z
+  .string()
+  .trim()
+  .min(2, "Please enter a location")
+  .max(MAX_LOCATION_LENGTH, `Location is too long — keep it under ${MAX_LOCATION_LENGTH} characters`);
 
 const CATEGORY_KEYS = Object.keys(CATEGORIES) as CategoryKey[];
 
@@ -97,7 +101,8 @@ export const CreateTab = () => {
   }, [locationName, selectedPlace, city.lat, city.lng]);
 
   const selectPlace = (place: GeoPlace) => {
-    setLocationName(place.label);
+    // A picked suggestion must always pass validation (QA-028).
+    setLocationName(clampLocation(place.label));
     setSelectedPlace({ lat: place.lat, lng: place.lng });
     setPlaceSuggestions([]);
     setShowSuggestions(false);
@@ -319,7 +324,7 @@ export const CreateTab = () => {
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
             placeholder="Eiserner Steg, Frankfurt"
             required
-            maxLength={120}
+            maxLength={MAX_LOCATION_LENGTH}
             autoComplete="off"
             className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />

@@ -17,9 +17,49 @@ const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
 
 type NominatimResult = {
   display_name: string;
+  name?: string;
   lat: string;
   lon: string;
   address?: Record<string, string>;
+};
+
+/** Max length of an activity location (matches the Create/Edit validation). */
+export const MAX_LOCATION_LENGTH = 120;
+
+/**
+ * Shortens text to at most `max` characters, cutting at a ", " boundary when
+ * possible, so a picked suggestion always passes validation (QA-028).
+ */
+export const clampLocation = (text: string, max = MAX_LOCATION_LENGTH): string => {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  const parts = t.split(", ");
+  let out = parts[0];
+  for (const p of parts.slice(1)) {
+    if (`${out}, ${p}`.length > max) break;
+    out = `${out}, ${p}`;
+  }
+  return out.length <= max ? out : `${out.slice(0, max - 1).trimEnd()}…`;
+};
+
+/**
+ * Compact label for a search result: place name, street, area, city — instead
+ * of Nominatim's full display_name (which adds state, country, postcode, …).
+ */
+export const shortPlaceLabel = (
+  r: Pick<NominatimResult, "display_name" | "name" | "address">,
+): string => {
+  const a = r.address ?? {};
+  const street = [a.road, a.house_number].filter(Boolean).join(" ");
+  const area = a.suburb ?? a.neighbourhood ?? a.quarter ?? a.city_district;
+  const city = a.city ?? a.town ?? a.village ?? a.municipality;
+  const name = r.name || r.display_name.split(",")[0];
+  const parts: string[] = [];
+  for (const p of [name, street, area, city]) {
+    const v = p?.trim();
+    if (v && !parts.includes(v)) parts.push(v);
+  }
+  return clampLocation(parts.length ? parts.join(", ") : r.display_name);
 };
 
 /** Address/place search for autocomplete-style suggestions (e.g. hosting an activity). */
@@ -30,7 +70,7 @@ export const searchPlaces = async (
 ): Promise<GeoPlace[]> => {
   const q = query.trim();
   if (q.length < 3) return [];
-  let url = `${NOMINATIM_BASE}/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=5&addressdetails=0`;
+  let url = `${NOMINATIM_BASE}/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=5&addressdetails=1`;
   if (near) {
     // Soft bias toward the current city — doesn't exclude results elsewhere (bounded=0).
     const d = 0.6;
@@ -41,7 +81,7 @@ export const searchPlaces = async (
   if (!res.ok) throw new Error("Search failed");
   const data = (await res.json()) as NominatimResult[];
   return data.map((r) => ({
-    label: r.display_name,
+    label: shortPlaceLabel(r),
     lat: parseFloat(r.lat),
     lng: parseFloat(r.lon),
   }));

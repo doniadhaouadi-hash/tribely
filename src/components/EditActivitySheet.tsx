@@ -26,11 +26,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { LevelPicker } from "@/components/LevelPicker";
 import { uploadImage, UploadError } from "@/lib/uploadImage";
-import { searchPlaces, type GeoPlace } from "@/lib/geocode";
+import { clampLocation, MAX_LOCATION_LENGTH, searchPlaces, type GeoPlace } from "@/lib/geocode";
 
 const titleSchema = z.string().trim().min(3, "Min 3 characters").max(80);
 const descSchema = z.string().trim().max(500).optional();
-const locationSchema = z.string().trim().min(2, "Required").max(120);
+const locationSchema = z
+  .string()
+  .trim()
+  .min(2, "Please enter a location")
+  .max(MAX_LOCATION_LENGTH, `Location is too long — keep it under ${MAX_LOCATION_LENGTH} characters`);
 
 const CATEGORY_KEYS = Object.keys(CATEGORIES) as CategoryKey[];
 
@@ -77,7 +81,7 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved, onCancelled
     setTitle(activity.title);
     setDescription(activity.description ?? "");
     setCategory(activity.category);
-    setLocationName(activity.address);
+    setLocationName(clampLocation(activity.address));
     setSelectedPlace(null);
     setPlaceSuggestions([]);
     setStartAt(toLocalInputValue(activity.startsAt));
@@ -92,7 +96,7 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved, onCancelled
   useEffect(() => {
     if (!activity || selectedPlace) return;
     const q = locationName.trim();
-    if (q.length < 3 || q === activity.address.trim()) {
+    if (q.length < 3 || q === clampLocation(activity.address)) {
       setPlaceSuggestions([]);
       return;
     }
@@ -115,7 +119,8 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved, onCancelled
   }, [locationName, selectedPlace, activity, city.lat, city.lng]);
 
   const selectPlace = (place: GeoPlace) => {
-    setLocationName(place.label);
+    // A picked suggestion must always pass validation (QA-028).
+    setLocationName(clampLocation(place.label));
     setSelectedPlace({ lat: place.lat, lng: place.lng });
     setPlaceSuggestions([]);
     setShowSuggestions(false);
@@ -171,9 +176,11 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved, onCancelled
       if (selectedPlace) {
         lat = selectedPlace.lat;
         lng = selectedPlace.lng;
-      } else if (locV !== activity.address.trim()) {
+      } else if (locV !== clampLocation(activity.address)) {
         try {
-          const [found] = await searchPlaces(locV, undefined, { lat, lng });
+          // Bias toward the selected city, not the stored coordinates (which
+          // may be wrong, e.g. old activities placed at the Frankfurt default).
+          const [found] = await searchPlaces(locV, undefined, { lat: city.lat, lng: city.lng });
           if (found) {
             lat = found.lat;
             lng = found.lng;
@@ -352,7 +359,7 @@ export const EditActivitySheet = ({ activity, onOpenChange, onSaved, onCancelled
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                     required
-                    maxLength={120}
+                    maxLength={MAX_LOCATION_LENGTH}
                     autoComplete="off"
                     className="w-full rounded-2xl glass px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   />
