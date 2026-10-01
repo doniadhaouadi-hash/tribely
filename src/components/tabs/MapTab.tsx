@@ -84,10 +84,9 @@ export const MapTab = ({ onOpenActivity }: Props) => {
         className="absolute inset-0 z-0"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          maxZoom={20}
-          detectRetina
+          attribution="Tiles &copy; Esri — Esri, HERE, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors"
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+          maxZoom={19}
         />
         <RecenterOnCity lat={city.lat} lng={city.lng} />
         {filtered.map((a) => (
