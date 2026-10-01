@@ -14,6 +14,7 @@ import type { MockActivity } from "@/data/activities";
 import { cn } from "@/lib/utils";
 import { errorMessage } from "@/lib/errors";
 import { LoadError } from "@/components/LoadError";
+import { dismissOnboarding, isOnboardingDismissed } from "@/lib/onboardingDismissal";
 
 type Tab = "upcoming" | "hosted" | "past" | "favorites";
 
@@ -55,12 +56,17 @@ export const YouTab = () => {
     }
   };
 
-  // Auto-prompt onboarding for fresh users
+  // Auto-prompt onboarding for fresh users, unless they dismissed it this session
   useEffect(() => {
-    if (user && profile && !profile.onboarded) {
+    if (user && profile && !profile.onboarded && !isOnboardingDismissed(user.id)) {
       setShowOnboarding(true);
     }
   }, [user, profile]);
+
+  const closeOnboarding = () => {
+    setShowOnboarding(false);
+    if (user) dismissOnboarding(user.id);
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -292,7 +298,7 @@ export const YouTab = () => {
       />
       <OnboardingSheet
         open={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
+        onClose={closeOnboarding}
       />
     </>
   );

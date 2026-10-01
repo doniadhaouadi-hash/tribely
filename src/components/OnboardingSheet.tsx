@@ -24,7 +24,7 @@ type Props = {
 };
 
 export const OnboardingSheet = ({ open, onClose }: Props) => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -98,10 +98,9 @@ export const OnboardingSheet = ({ open, onClose }: Props) => {
         })
         .eq("id", user.id);
       if (error) throw error;
+      await refreshProfile();
       toast.success("Welcome to Tribely 🎉");
       onClose();
-      // Small delay so the sheet closes before reload-ish UI updates
-      setTimeout(() => window.location.reload(), 300);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't save profile");
     } finally {
