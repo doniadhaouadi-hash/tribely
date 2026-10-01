@@ -23,6 +23,18 @@ type NominatimResult = {
   address?: Record<string, string>;
 };
 
+/**
+ * Language for Nominatim results: the browser language with English as
+ * fallback. Without it, street/area names come in the local script (e.g.
+ * Arabic) while the place name is Latin, giving mixed labels (QA-029).
+ */
+export const acceptLanguage = (
+  languages: readonly string[] = typeof navigator !== "undefined" ? navigator.languages ?? [] : [],
+) => {
+  const langs = [...languages.filter(Boolean), "en"];
+  return encodeURIComponent(Array.from(new Set(langs)).join(","));
+};
+
 /** Max length of an activity location (matches the Create/Edit validation). */
 export const MAX_LOCATION_LENGTH = 120;
 
@@ -70,7 +82,7 @@ export const searchPlaces = async (
 ): Promise<GeoPlace[]> => {
   const q = query.trim();
   if (q.length < 3) return [];
-  let url = `${NOMINATIM_BASE}/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=5&addressdetails=1`;
+  let url = `${NOMINATIM_BASE}/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=5&addressdetails=1&accept-language=${acceptLanguage()}`;
   if (near) {
     // Soft bias toward the current city — doesn't exclude results elsewhere (bounded=0).
     const d = 0.6;
@@ -91,7 +103,7 @@ export const searchPlaces = async (
 export const searchCities = async (query: string, signal?: AbortSignal): Promise<GeoCity[]> => {
   const q = query.trim();
   if (q.length < 2) return [];
-  const url = `${NOMINATIM_BASE}/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=6&addressdetails=1&featureType=city`;
+  const url = `${NOMINATIM_BASE}/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=6&addressdetails=1&featureType=city&accept-language=${acceptLanguage()}`;
   const res = await fetch(url, { signal, headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error("Search failed");
   const data = (await res.json()) as NominatimResult[];
@@ -110,7 +122,7 @@ export const searchCities = async (query: string, signal?: AbortSignal): Promise
 
 /** Reverse-geocode coordinates (e.g. from navigator.geolocation) to a city name. */
 export const reverseGeocodeCity = async (lat: number, lng: number): Promise<GeoCity | null> => {
-  const url = `${NOMINATIM_BASE}/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`;
+  const url = `${NOMINATIM_BASE}/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1&accept-language=${acceptLanguage()}`;
   const res = await fetch(url, { headers: { Accept: "application/json" } });
   if (!res.ok) return null;
   const r = (await res.json()) as NominatimResult;

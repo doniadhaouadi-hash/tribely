@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clampLocation, MAX_LOCATION_LENGTH, shortPlaceLabel } from "@/lib/geocode";
+import { acceptLanguage, clampLocation, MAX_LOCATION_LENGTH, shortPlaceLabel } from "@/lib/geocode";
 
 // The suggestion Donia picked live (125 characters).
 const GALLERIA =
@@ -48,5 +48,13 @@ describe("location labels (QA-028)", () => {
         address: { city: "Frankfurt am Main" },
       }),
     ).toBe("Frankfurt am Main");
+  });
+});
+
+describe("acceptLanguage (QA-029)", () => {
+  it("asks Nominatim for the browser language with English fallback", () => {
+    expect(decodeURIComponent(acceptLanguage(["de-DE", "de"]))).toBe("de-DE,de,en");
+    expect(decodeURIComponent(acceptLanguage(["en-US", "en"]))).toBe("en-US,en");
+    expect(acceptLanguage([])).toBe("en");
   });
 });
