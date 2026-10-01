@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { CATEGORIES, type MockActivity } from "@/data/activities";
 import { Avatar } from "@/components/Avatar";
@@ -35,6 +35,7 @@ import { downloadIcs } from "@/lib/calendar";
 import { shareActivity } from "@/lib/share";
 import { authLink } from "@/lib/redirect";
 import { errorMessage } from "@/lib/errors";
+import { supabase } from "@/integrations/supabase/client";
 
 type Props = {
   activity: MockActivity | null;
@@ -46,6 +47,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
   const { joinedIds, refresh: refreshRSVPs } = useUserRSVPs();
   const { favoriteIds, toggle: toggleFavorite } = useFavorites();
   const [participants, setParticipants] = useState<ParticipantWithProfile[]>([]);
+  const [participantsFor, setParticipantsFor] = useState<string | null>(null);
   const [loadingParts, setLoadingParts] = useState(false);
   const [acting, setActing] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -57,16 +59,50 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
   const isJoined = !!activity && joinedIds.has(activity.id);
   const isHost = !!activity && !!user && user.id === activity.host.id;
 
+  const loadParticipants = useCallback(async (activityId: string) => {
+    const next = await fetchParticipants(activityId);
+    setParticipants(next);
+    setParticipantsFor(activityId);
+    return next;
+  }, []);
+
+  // The activity prop is a snapshot (e.g. from the You tab), so the joined
+  // count comes from the freshly loaded participant list once available.
+  const joinedCount =
+    activity && participantsFor === activity.id ? participants.length : activity?.joined ?? 0;
+
   useEffect(() => {
     if (!activity) {
       setParticipants([]);
+      setParticipantsFor(null);
       return;
     }
+    const activityId = activity.id;
     setLoadingParts(true);
-    fetchParticipants(activity.id)
-      .then(setParticipants)
+    loadParticipants(activityId)
+      .catch(() => {})
       .finally(() => setLoadingParts(false));
-  }, [activity?.id, activity?.joined]);
+
+    const channel = supabase
+      .channel(`participants-${activityId}-${Math.random().toString(36).slice(2)}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "activity_participants",
+          filter: `activity_id=eq.${activityId}`,
+        },
+        () => {
+          loadParticipants(activityId).catch(() => {});
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activity?.id, activity?.joined, loadParticipants]);
 
   const handleJoin = async () => {
     if (!activity || !user) return;
@@ -78,7 +114,9 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
           description: "Your spot is back in the pool.",
         });
       } else {
-        if (activity.joined >= activity.capacity) {
+        // Check against fresh data; the server enforces this too (QA-005).
+        const fresh = await loadParticipants(activity.id);
+        if (fresh.length >= activity.capacity) {
           toast.error("This activity is full");
           return;
         }
@@ -86,12 +124,11 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
         toast.success("You're in 🎉", { description: activity.title });
       }
       await refreshRSVPs();
-      const next = await fetchParticipants(activity.id);
-      setParticipants(next);
+      await loadParticipants(activity.id);
     } catch (e) {
       // The server rejects joins to full/closed activities (QA-005).
       toast.error(errorMessage(e, "Action failed"));
-      fetchParticipants(activity.id).then(setParticipants).catch(() => {});
+      loadParticipants(activity.id).catch(() => {});
     } finally {
       setActing(false);
     }
@@ -235,7 +272,7 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
                   <h3 className="font-display text-sm font-semibold">Tribe</h3>
                   <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Users className="size-3.5" aria-hidden />
-                    {activity.joined}/{activity.capacity} joined
+                    {joinedCount}/{activity.capacity} joined
                   </span>
                 </div>
                 <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 py-1">
