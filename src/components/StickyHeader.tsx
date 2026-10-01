@@ -1,12 +1,14 @@
-import { Bell, ChevronDown, MapPin } from "lucide-react";
+import { Bell, ChevronDown, MapPin, Moon, Sun } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLocation } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/hooks/useTheme";
 import { Avatar } from "@/components/Avatar";
 
 export const StickyHeader = () => {
   const { city, openPicker } = useLocation();
   const { user, profile } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-40 glass rounded-none">
@@ -30,6 +32,19 @@ export const StickyHeader = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            className="grid place-items-center size-10 rounded-full glass hover:bg-white/20 transition-colors"
+          >
+            {theme === "dark" ? (
+              <Sun className="size-5 text-foreground" aria-hidden />
+            ) : (
+              <Moon className="size-5 text-foreground" aria-hidden />
+            )}
+          </button>
+
           <button
             type="button"
             aria-label="Notifications"
