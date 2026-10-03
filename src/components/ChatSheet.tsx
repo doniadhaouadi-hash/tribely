@@ -17,6 +17,7 @@ import {
   setPendingState,
 } from "@/lib/chatMessages";
 import { errorMessage } from "@/lib/errors";
+import { isTouchDevice, shouldSendOnEnter } from "@/lib/chatKeys";
 import type { MockActivity } from "@/data/activities";
 import { Avatar } from "@/components/Avatar";
 import { toast } from "sonner";
@@ -36,7 +37,12 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
   const { user, profile } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraftState] = useState("");
+  const draftRef = useRef("");
+  const setDraft = (value: string) => {
+    draftRef.current = value;
+    setDraftState(value);
+  };
   const scrollRef = useRef<HTMLDivElement>(null);
   // Authors we already know, so realtime messages don't trigger a full reload.
   const authorsRef = useRef(new Map<string, ChatAuthor>());
@@ -115,8 +121,11 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
   // Optimistic send: clear the field and show the message right away (QA-034).
   const handleSend = () => {
     if (!activity || !user) return;
-    const text = draft.trim();
+    // Read and clear through a ref: a quick double Enter fires twice before
+    // React re-renders, and must not send the same text twice (QA-035).
+    const text = draftRef.current.trim();
     if (!text) return;
+    draftRef.current = "";
     setDraft("");
     const author: ChatAuthor = {
       display_name: profile?.display_name?.trim() || "You",
@@ -239,7 +248,13 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
+                  const keyEvent = {
+                    key: e.key,
+                    shiftKey: e.shiftKey,
+                    keyCode: e.keyCode,
+                    isComposing: e.nativeEvent.isComposing,
+                  };
+                  if (shouldSendOnEnter(keyEvent, isTouchDevice())) {
                     e.preventDefault();
                     handleSend();
                   }

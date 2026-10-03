@@ -13,3 +13,8 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => {},
   }),
 });
+
+// jsdom has no element scrolling; components call it to stick to the newest chat message.
+if (!Element.prototype.scrollTo) {
+  Element.prototype.scrollTo = () => {};
+}
