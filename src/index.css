@@ -305,3 +305,9 @@
   height: max(18rem, calc(100vh - 5.75rem - var(--nav-clearance)));
   height: max(18rem, calc(100dvh - 5.75rem - var(--nav-clearance)));
 }
+
+/* Tall bottom sheets (chat): dynamic viewport height so mobile browser bars don't cut them (QA-037). */
+.sheet-tall {
+  height: 92vh;
+  height: 92dvh;
+}

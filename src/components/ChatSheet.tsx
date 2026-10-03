@@ -18,6 +18,7 @@ import {
 } from "@/lib/chatMessages";
 import { errorMessage } from "@/lib/errors";
 import { isTouchDevice, shouldSendOnEnter } from "@/lib/chatKeys";
+import { useKeyboardInset } from "@/hooks/useKeyboardInset";
 import type { MockActivity } from "@/data/activities";
 import { Avatar } from "@/components/Avatar";
 import { toast } from "sonner";
@@ -43,6 +44,7 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
   const [draft, setDraftState] = useState("");
   const draftRef = useRef("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const keyboard = useKeyboardInset(!!activity);
   const setDraft = (value: string) => {
     draftRef.current = value;
     setDraftState(value);
@@ -161,7 +163,13 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
         title={activity ? `Chat: ${activity.title}` : "Chat"}
         hideClose
         side="bottom"
-        className="p-0 max-h-[92vh] h-[92vh] rounded-t-[2rem] border-0 bg-card overflow-hidden"
+        className="sheet-tall p-0 rounded-t-[2rem] border-0 bg-card overflow-hidden"
+        // Stay above the iOS keyboard, which doesn't resize fixed elements (QA-037)
+        style={
+          keyboard.inset > 0
+            ? { bottom: keyboard.inset, height: Math.round(keyboard.visibleHeight * 0.92) }
+            : undefined
+        }
       >
         {activity && (
           <div className="flex flex-col h-full">
@@ -274,6 +282,12 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
                   }
                 }}
                 placeholder="Message your tribe…"
+                onFocus={() => {
+                  // Once the keyboard has opened, show the newest message above it (QA-037)
+                  window.setTimeout(() => {
+                    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+                  }, 300);
+                }}
                 rows={1}
                 className="flex-1 resize-none rounded-2xl bg-muted px-4 py-2.5 text-sm leading-5 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 overflow-y-auto"
               />
