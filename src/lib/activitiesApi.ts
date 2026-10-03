@@ -83,7 +83,8 @@ export const rowToActivity = (
     displayName: host?.display_name?.trim() || "Host",
     avatarSeed: host?.id ?? row.host_id,
     avatarUrl: host?.avatar_url ?? null,
-    rating: host?.rating ? Number(host.rating) : 5,
+    // 0 is the DB default = never rated; don't invent a 5.0 (QA-032).
+    rating: host?.rating ? Number(host.rating) : null,
   },
 });
 

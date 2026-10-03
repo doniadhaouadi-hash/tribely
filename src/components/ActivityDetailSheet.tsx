@@ -261,10 +261,16 @@ export const ActivityDetailSheet = ({ activity, onOpenChange }: Props) => {
                     {activity.host.displayName}
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs font-semibold">
-                  <Star className="size-3.5 text-accent fill-accent" aria-hidden />
-                  {activity.host.rating.toFixed(1)}
-                </div>
+                {activity.host.rating !== null ? (
+                  <div className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-xs font-semibold">
+                    <Star className="size-3.5 text-accent fill-accent" aria-hidden />
+                    {activity.host.rating.toFixed(1)}
+                  </div>
+                ) : (
+                  <div className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
+                    New host
+                  </div>
+                )}
               </section>
 
               {activity.description && (

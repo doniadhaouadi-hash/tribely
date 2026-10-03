@@ -59,5 +59,13 @@ describe("rowToActivity", () => {
     expect(a.skillLevel).toBe("casual");
     expect(a.host.displayName).toBe("Host");
     expect(a.host.avatarSeed).toBe("h1");
+    expect(a.host.rating).toBeNull();
+  });
+});
+
+describe("host rating (QA-032)", () => {
+  it("treats the DB default 0 as 'not rated' instead of 5.0", () => {
+    const a = rowToActivity(row(), { id: "h1", display_name: "Ana", avatar_url: null, rating: 0 });
+    expect(a.host.rating).toBeNull();
   });
 });

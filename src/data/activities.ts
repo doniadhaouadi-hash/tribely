@@ -69,6 +69,7 @@ export type MockActivity = {
     displayName: string;
     avatarSeed: string;
     avatarUrl: string | null;
-    rating: number;
+    /** Average rating, or null while the host has no ratings yet. */
+    rating: number | null;
   };
 };

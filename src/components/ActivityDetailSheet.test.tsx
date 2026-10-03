@@ -68,3 +68,18 @@ describe("ActivityDetailSheet chat button (FR-001)", () => {
     expect(screen.getByRole("button", { name: /chat/i })).toBeInTheDocument();
   });
 });
+
+describe("ActivityDetailSheet host rating (QA-032)", () => {
+  it("shows 'New host' instead of stars when the host has no rating", () => {
+    render(
+      <MemoryRouter>
+        <ActivityDetailSheet
+          activity={makeActivity({ host: { ...makeActivity().host, rating: null } })}
+          onOpenChange={() => {}}
+        />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText("New host")).toBeInTheDocument();
+    expect(screen.queryByText("5.0")).toBeNull();
+  });
+});
