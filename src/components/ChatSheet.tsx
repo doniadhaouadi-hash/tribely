@@ -1,9 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Loader2, Send, X } from "lucide-react";
+import { Loader2, RotateCw, Send, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { fetchMessages, sendMessage, type ChatMessage } from "@/lib/chatApi";
+import {
+  fetchAuthor,
+  fetchMessages,
+  sendMessage,
+  type ChatAuthor,
+  type ChatMessage,
+} from "@/lib/chatApi";
+import {
+  makePendingMessage,
+  mergeServerMessage,
+  resolvePending,
+  setPendingState,
+} from "@/lib/chatMessages";
+import { errorMessage } from "@/lib/errors";
 import type { MockActivity } from "@/data/activities";
 import { Avatar } from "@/components/Avatar";
 import { toast } from "sonner";
@@ -20,12 +33,13 @@ const formatTime = (iso: string) => {
 };
 
 export const ChatSheet = ({ activity, onOpenChange }: Props) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState("");
-  const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Authors we already know, so realtime messages don't trigger a full reload.
+  const authorsRef = useRef(new Map<string, ChatAuthor>());
 
   const open = !!activity;
 
@@ -34,28 +48,47 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
       setMessages([]);
       return;
     }
+    const activityId = activity.id;
+    let cancelled = false;
     setLoading(true);
-    fetchMessages(activity.id)
-      .then(setMessages)
+    fetchMessages(activityId)
+      .then((list) => {
+        if (cancelled) return;
+        list.forEach((m) => m.author && authorsRef.current.set(m.user_id, m.author));
+        // Keep optimistic messages sent while the history was loading.
+        setMessages((prev) =>
+          prev
+            .filter((m) => (m.pending || m.failed) && m.activity_id === activityId)
+            .reduce(mergeServerMessage, list),
+        );
+      })
       .catch(() => toast.error("Couldn't load chat"))
-      .finally(() => setLoading(false));
+      .finally(() => !cancelled && setLoading(false));
 
+    // New messages: append just the new row instead of reloading the chat (QA-034).
     const channel = supabase
-      .channel(`chat-${activity.id}-${Math.random().toString(36).slice(2)}`)
+      .channel(`chat-${activityId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "chat_messages",
-          filter: `activity_id=eq.${activity.id}`,
+          filter: `activity_id=eq.${activityId}`,
         },
-        () => {
-          fetchMessages(activity.id).then(setMessages);
+        async (payload) => {
+          const row = payload.new as ChatMessage;
+          let author = authorsRef.current.get(row.user_id);
+          if (!author) {
+            author = await fetchAuthor(row.user_id);
+            authorsRef.current.set(row.user_id, author);
+          }
+          if (!cancelled) setMessages((prev) => mergeServerMessage(prev, { ...row, author }));
         },
       )
       .subscribe();
     return () => {
+      cancelled = true;
       supabase.removeChannel(channel);
     };
   }, [activity?.id]);
@@ -64,17 +97,40 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!activity || !user || !draft.trim()) return;
-    setSending(true);
+  const deliver = async (pending: ChatMessage) => {
+    const clientId = pending.clientId!;
     try {
-      await sendMessage(activity.id, user.id, draft);
-      setDraft("");
+      const saved = await sendMessage(pending.activity_id, pending.user_id, pending.body);
+      if (saved) {
+        setMessages((prev) => resolvePending(prev, clientId, { ...saved, author: pending.author }));
+      }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to send");
-    } finally {
-      setSending(false);
+      setMessages((prev) => setPendingState(prev, clientId, { pending: false, failed: true }));
+      toast.error(errorMessage(e, "Couldn't send your message"), {
+        description: "Tap the message to try again.",
+      });
     }
+  };
+
+  // Optimistic send: clear the field and show the message right away (QA-034).
+  const handleSend = () => {
+    if (!activity || !user) return;
+    const text = draft.trim();
+    if (!text) return;
+    setDraft("");
+    const author: ChatAuthor = {
+      display_name: profile?.display_name?.trim() || "You",
+      avatar_url: profile?.avatar_url ?? null,
+    };
+    const pending = makePendingMessage(activity.id, user.id, text, author);
+    setMessages((prev) => [...prev, pending]);
+    void deliver(pending);
+  };
+
+  const retry = (m: ChatMessage) => {
+    if (!m.clientId) return;
+    setMessages((prev) => setPendingState(prev, m.clientId!, { pending: true, failed: false }));
+    void deliver({ ...m, pending: true, failed: false });
   };
 
   return (
@@ -132,10 +188,12 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
                       <Avatar url={m.author?.avatar_url} seed={m.user_id} size={32} />
                       <div
                         className={cn(
-                          "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm",
+                          "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm transition-opacity",
                           mine
                             ? "bg-primary text-primary-foreground rounded-br-md"
                             : "bg-muted text-foreground rounded-bl-md",
+                          m.pending && "opacity-70",
+                          m.failed && "ring-2 ring-destructive",
                         )}
                       >
                         {!mine && (
@@ -144,14 +202,24 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
                           </div>
                         )}
                         <p className="whitespace-pre-wrap break-words leading-snug">{m.body}</p>
-                        <div
-                          className={cn(
-                            "text-[10px] mt-1",
-                            mine ? "text-primary-foreground/70" : "text-muted-foreground",
-                          )}
-                        >
-                          {formatTime(m.created_at)}
-                        </div>
+                        {m.failed ? (
+                          <button
+                            type="button"
+                            onClick={() => retry(m)}
+                            className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold underline underline-offset-2"
+                          >
+                            <RotateCw className="size-3" aria-hidden /> Not sent · Retry
+                          </button>
+                        ) : (
+                          <div
+                            className={cn(
+                              "text-[10px] mt-1",
+                              mine ? "text-primary-foreground/70" : "text-muted-foreground",
+                            )}
+                          >
+                            {m.pending ? "Sending…" : formatTime(m.created_at)}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -182,15 +250,11 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
               />
               <button
                 type="submit"
-                disabled={sending || !draft.trim()}
+                disabled={!draft.trim()}
                 aria-label="Send"
                 className="grid place-items-center size-11 rounded-full bg-gradient-primary text-primary-foreground shadow-glow disabled:opacity-50 transition-transform hover:scale-105 active:scale-95"
               >
-                {sending ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Send className="size-4" aria-hidden />
-                )}
+                <Send className="size-4" aria-hidden />
               </button>
             </form>
           </div>
