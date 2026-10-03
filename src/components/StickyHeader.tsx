@@ -12,27 +12,28 @@ export const StickyHeader = () => {
 
   return (
     <header className="sticky top-0 z-40 glass rounded-none">
-      <div className="max-w-md mx-auto flex items-center justify-between gap-3 px-4 py-3">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="max-w-md mx-auto flex items-center justify-between gap-2 px-4 py-3">
+        {/* Left side shrinks (the city name truncates) so nothing overlaps on narrow phones (QA-038) */}
+        <div className="flex items-center gap-2 min-w-0">
           <button
             type="button"
             onClick={openPicker}
             aria-label="Change location"
-            className="flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-foreground hover:bg-white/20 transition-colors"
+            className="flex min-w-0 items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-foreground hover:bg-white/20 transition-colors"
           >
-            <MapPin className="size-3.5 text-primary" aria-hidden />
-            <span className="truncate max-w-[8rem]">
+            <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden />
+            <span className="min-w-0 truncate max-w-[8rem]">
               {city.name}
               {city.countryCode ? `, ${city.countryCode}` : ""}
             </span>
-            <ChevronDown className="size-3.5 text-muted-foreground" aria-hidden />
+            <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
           </button>
-          <h1 className="font-display text-xl font-bold leading-none text-gradient-primary">
+          <h1 className="shrink-0 font-display text-xl font-bold leading-none text-gradient-primary">
             Tribely.
           </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={toggleTheme}
@@ -57,7 +58,7 @@ export const StickyHeader = () => {
           ) : (
             <Link
               to="/auth"
-              className="rounded-full bg-gradient-primary text-primary-foreground px-4 py-1.5 text-sm font-semibold shadow-glow hover:scale-105 transition-transform ease-bounce"
+              className="whitespace-nowrap rounded-full bg-gradient-primary text-primary-foreground px-4 py-1.5 text-sm font-semibold shadow-glow hover:scale-105 transition-transform ease-bounce"
             >
               Sign in
             </Link>
