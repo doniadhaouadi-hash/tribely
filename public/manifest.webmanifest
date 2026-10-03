@@ -1,0 +1,18 @@
+{
+  "id": "/",
+  "name": "Tribely",
+  "short_name": "Tribely",
+  "description": "Find, join or host local activities. Find your tribe. Move together.",
+  "start_url": "/?tab=discover",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#8B7CF6",
+  "background_color": "#f5f6fc",
+  "icons": [
+    { "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
