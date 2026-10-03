@@ -50,8 +50,16 @@ export const FeedbackSheet = ({ open, onOpenChange }: Props) => {
     if (!message.trim()) return;
     setSending(true);
     try {
-      await sendFeedback({ message, screenshot, userId: user?.id ?? null });
-      toast.success("Thanks, got it!", { description: "Your feedback reached the Tribely team." });
+      const { screenshotSaved } = await sendFeedback({
+        message,
+        screenshot,
+        userId: user?.id ?? null,
+      });
+      toast.success("Thanks, got it!", {
+        description: screenshotSaved
+          ? "Your feedback reached the Tribely team."
+          : "Your feedback arrived, but the screenshot couldn't be attached.",
+      });
       reset();
       onOpenChange(false);
     } catch (err) {

@@ -288,6 +288,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      attach_feedback_screenshot: {
+        Args: { _feedback_id: string; _path: string }
+        Returns: undefined
+      }
+      can_attach_feedback_screenshot: {
+        Args: { _name: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

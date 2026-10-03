@@ -45,34 +45,69 @@ export type FeedbackInput = {
   userId?: string | null;
 };
 
-/** Sends a feedback report; uploads the optional screenshot first. */
-export const sendFeedback = async ({ message, screenshot, userId }: FeedbackInput) => {
+export type FeedbackResult = {
+  /** false when the text was saved but the screenshot couldn't be attached */
+  screenshotSaved: boolean;
+};
+
+const uploadScreenshot = async (path: string, file: File) => {
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (error) throw new UploadError(error.message);
+};
+
+/**
+ * Sends a feedback report.
+ * - Logged in: upload the screenshot to <uid>/feedback/… first, then insert.
+ * - Logged out (QA-039): insert first with our own id, then upload to
+ *   anon/<feedback id>/… (the storage policy allows one file for a fresh
+ *   entry) and link it via attach_feedback_screenshot().
+ */
+export const sendFeedback = async ({
+  message,
+  screenshot,
+  userId,
+}: FeedbackInput): Promise<FeedbackResult> => {
   const text = message.trim();
   if (!text) throw new Error("Please describe what happened");
   if (text.length > MAX_FEEDBACK_LENGTH) {
     throw new Error(`Please keep it under ${MAX_FEEDBACK_LENGTH} characters`);
   }
+  if (screenshot) validateImage(screenshot);
 
-  const deviceId = getDeviceId();
-  let screenshotPath: string | null = null;
-  if (screenshot) {
-    validateImage(screenshot);
-    // Same folder rule as the storage policy: <uid>/… or anon/…
-    const owner = userId ?? "anon";
-    screenshotPath = buildUploadPath(owner, "feedback", screenshot.name);
-    const { error } = await supabase.storage.from(BUCKET).upload(screenshotPath, screenshot, {
-      contentType: screenshot.type,
-      upsert: false,
-    });
-    if (error) throw new UploadError(error.message);
+  const id = crypto.randomUUID();
+  const base = { id, device_id: getDeviceId(), message: text, ...collectContext() };
+
+  if (userId) {
+    let screenshotPath: string | null = null;
+    if (screenshot) {
+      screenshotPath = buildUploadPath(userId, "feedback", screenshot.name);
+      await uploadScreenshot(screenshotPath, screenshot);
+    }
+    const { error } = await supabase
+      .from("feedback")
+      .insert({ ...base, user_id: userId, screenshot_path: screenshotPath });
+    if (error) throw error;
+    return { screenshotSaved: true };
   }
 
-  const { error } = await supabase.from("feedback").insert({
-    user_id: userId ?? null,
-    device_id: deviceId,
-    message: text,
-    screenshot_path: screenshotPath,
-    ...collectContext(),
-  });
+  const { error } = await supabase.from("feedback").insert({ ...base, user_id: null });
   if (error) throw error;
+  if (!screenshot) return { screenshotSaved: true };
+
+  try {
+    const path = buildUploadPath("anon", id, screenshot.name);
+    await uploadScreenshot(path, screenshot);
+    const { error: attachError } = await supabase.rpc("attach_feedback_screenshot", {
+      _feedback_id: id,
+      _path: path,
+    });
+    if (attachError) throw attachError;
+    return { screenshotSaved: true };
+  } catch {
+    // The text arrived; only the image is missing.
+    return { screenshotSaved: false };
+  }
 };

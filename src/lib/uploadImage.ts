@@ -20,7 +20,7 @@ export class UploadError extends Error {}
  */
 export const buildUploadPath = (
   ownerId: string,
-  folder: "avatars" | "activities" | "feedback",
+  folder: string,
   fileName: string,
   now = Date.now(),
 ) => {
