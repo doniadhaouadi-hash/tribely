@@ -291,3 +291,17 @@
   padding: 2px 6px !important;
 }
 .leaflet-control-attribution a { color: hsl(var(--foreground)) !important; }
+
+/*
+ * Space the floating bottom navigation takes (bottom-4 + ~77px bar + gap),
+ * plus the iOS home-indicator inset. Full-height views end above it (QA-033).
+ */
+:root {
+  --nav-clearance: calc(6.5rem + env(safe-area-inset-bottom));
+}
+
+/* Map tab: from below the header (5.75rem) down to just above the nav. */
+.map-viewport {
+  height: max(18rem, calc(100vh - 5.75rem - var(--nav-clearance)));
+  height: max(18rem, calc(100dvh - 5.75rem - var(--nav-clearance)));
+}

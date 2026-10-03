@@ -10,6 +10,7 @@ import { CategoryFilterRow } from "@/components/CategoryFilterRow";
 import { createCategoryMarker } from "@/lib/mapMarker";
 import { ActivityPreviewCard } from "@/components/ActivityPreviewCard";
 import { LoadError } from "@/components/LoadError";
+import { cn } from "@/lib/utils";
 import { FEED_GRACE_MS } from "@/lib/activitiesApi";
 import { DEFAULT_RADIUS_KM, isWithinRadius } from "@/lib/distance";
 
@@ -82,7 +83,7 @@ export const MapTab = ({ onOpenActivity }: Props) => {
   };
 
   return (
-    <div className="relative -mx-4 h-[calc(100vh-7.5rem)] overflow-hidden rounded-t-3xl">
+    <div className="map-viewport relative -mx-4 overflow-hidden rounded-3xl">
       <MapContainer
         center={[city.lat, city.lng]}
         zoom={13}
@@ -133,7 +134,11 @@ export const MapTab = ({ onOpenActivity }: Props) => {
         onClick={handleMyLocation}
         disabled={locating}
         aria-label="Use my location"
-        className="absolute bottom-28 right-3 z-10 grid place-items-center size-11 rounded-full glass-strong text-foreground shadow-float hover:scale-105 active:scale-95 transition-transform ease-bounce disabled:opacity-60"
+        className={cn(
+          "absolute right-3 z-10 grid place-items-center size-11 rounded-full glass-strong text-foreground shadow-float hover:scale-105 active:scale-95 transition-[transform,bottom] ease-bounce disabled:opacity-60",
+          // Sit above the preview card while it is open
+          selected ? "bottom-[10rem]" : "bottom-8",
+        )}
       >
         {locating ? (
           <Loader2 className="size-5 text-primary animate-spin" aria-hidden />
