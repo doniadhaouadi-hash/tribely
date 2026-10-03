@@ -68,3 +68,20 @@ describe("ChatSheet composer", () => {
     expect(input.value).toBe("Hal");
   });
 });
+
+describe("ChatSheet keyboard focus (QA-036)", () => {
+  it("pressing Send doesn't take focus away from the message field", async () => {
+    const input = await setup();
+    input.focus();
+    fireEvent.change(input, { target: { value: "See you there" } });
+    const send = screen.getByRole("button", { name: "Send" });
+    // preventDefault on press keeps the focus (and the phone keyboard) in the textarea
+    expect(fireEvent.pointerDown(send)).toBe(false);
+    expect(fireEvent.mouseDown(send)).toBe(false);
+    fireEvent.click(send);
+    expect(document.activeElement).toBe(input);
+    expect(input.value).toBe("");
+    await act(async () => {});
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+  });
+});

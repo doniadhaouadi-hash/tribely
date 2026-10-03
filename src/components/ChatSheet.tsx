@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Loader2, RotateCw, Send, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,9 @@ type Props = {
   onOpenChange: (open: boolean) => void;
 };
 
+/** 5 lines of text-sm (20px line height) plus the textarea padding. */
+const MAX_INPUT_HEIGHT = 5 * 20 + 20;
+
 const formatTime = (iso: string) => {
   const d = new Date(iso);
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -39,6 +42,7 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
   const [loading, setLoading] = useState(false);
   const [draft, setDraftState] = useState("");
   const draftRef = useRef("");
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const setDraft = (value: string) => {
     draftRef.current = value;
     setDraftState(value);
@@ -103,6 +107,14 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
+  // Grow the textarea with its content, up to 5 lines (QA-036).
+  useLayoutEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, MAX_INPUT_HEIGHT)}px`;
+  }, [draft]);
+
   const deliver = async (pending: ChatMessage) => {
     const clientId = pending.clientId!;
     try {
@@ -133,6 +145,7 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
     };
     const pending = makePendingMessage(activity.id, user.id, text, author);
     setMessages((prev) => [...prev, pending]);
+    inputRef.current?.focus();
     void deliver(pending);
   };
 
@@ -245,6 +258,7 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
               className="shrink-0 border-t border-border px-3 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] flex items-end gap-2 bg-card"
             >
               <textarea
+                ref={inputRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => {
@@ -261,10 +275,13 @@ export const ChatSheet = ({ activity, onOpenChange }: Props) => {
                 }}
                 placeholder="Message your tribe…"
                 rows={1}
-                className="flex-1 resize-none rounded-2xl bg-muted px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 max-h-32"
+                className="flex-1 resize-none rounded-2xl bg-muted px-4 py-2.5 text-sm leading-5 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 overflow-y-auto"
               />
               <button
                 type="submit"
+                // Keep focus in the textarea so the phone keyboard stays open (QA-036)
+                onPointerDown={(e) => e.preventDefault()}
+                onMouseDown={(e) => e.preventDefault()}
                 disabled={!draft.trim()}
                 aria-label="Send"
                 className="grid place-items-center size-11 rounded-full bg-gradient-primary text-primary-foreground shadow-glow disabled:opacity-50 transition-transform hover:scale-105 active:scale-95"
