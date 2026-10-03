@@ -20,7 +20,7 @@ export class UploadError extends Error {}
  */
 export const buildUploadPath = (
   ownerId: string,
-  folder: "avatars" | "activities",
+  folder: "avatars" | "activities" | "feedback",
   fileName: string,
   now = Date.now(),
 ) => {
@@ -28,14 +28,19 @@ export const buildUploadPath = (
   return `${ownerId}/${folder}/${now}.${ext}`;
 };
 
-/** Uploads an image to the public `tribely-media` bucket and returns its public URL. */
-export const uploadImage = async (file: File, folder: "avatars" | "activities", ownerId: string) => {
+/** Throws an UploadError unless the file is an allowed image of at most 5MB. */
+export const validateImage = (file: File) => {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
     throw new UploadError("Please choose a JPG, PNG, WebP, GIF or HEIC image");
   }
   if (file.size > MAX_BYTES) {
     throw new UploadError("Image must be smaller than 5MB");
   }
+};
+
+/** Uploads an image to the public `tribely-media` bucket and returns its public URL. */
+export const uploadImage = async (file: File, folder: "avatars" | "activities", ownerId: string) => {
+  validateImage(file);
 
   const path = buildUploadPath(ownerId, folder, file.name);
 

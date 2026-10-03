@@ -1,11 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, Camera, Flame, Heart, Loader2, LogOut, Sparkles, Star, Trophy, User } from "lucide-react";
+import {
+  Calendar,
+  Camera,
+  Flame,
+  Heart,
+  Loader2,
+  LogOut,
+  MessageSquareWarning,
+  Sparkles,
+  Star,
+  Trophy,
+  User,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { ActivityListCard } from "@/components/ActivityListCard";
 import { ActivityDetailSheet } from "@/components/ActivityDetailSheet";
 import { OnboardingSheet } from "@/components/OnboardingSheet";
+import { FeedbackSheet } from "@/components/FeedbackSheet";
 import { Avatar } from "@/components/Avatar";
 import { fetchFavoriteActivities, fetchMyActivities, type MyActivitiesBuckets } from "@/lib/myActivitiesApi";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +48,7 @@ export const YouTab = () => {
   const [tab, setTab] = useState<Tab>("upcoming");
   const [active, setActive] = useState<MockActivity | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,6 +152,8 @@ export const YouTab = () => {
         >
           Sign in or sign up
         </Link>
+        <FeedbackButton onClick={() => setFeedbackOpen(true)} />
+        <FeedbackSheet open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       </div>
     );
   }
@@ -290,7 +306,11 @@ export const YouTab = () => {
           <LogOut className="size-4" aria-hidden />
           Sign out
         </button>
+
+        <FeedbackButton onClick={() => setFeedbackOpen(true)} />
       </div>
+
+      <FeedbackSheet open={feedbackOpen} onOpenChange={setFeedbackOpen} />
 
       <ActivityDetailSheet
         activity={active}
@@ -303,6 +323,17 @@ export const YouTab = () => {
     </>
   );
 };
+
+const FeedbackButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="w-full inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+  >
+    <MessageSquareWarning className="size-4" aria-hidden />
+    Send feedback
+  </button>
+);
 
 const Stat = ({
   icon: Icon,

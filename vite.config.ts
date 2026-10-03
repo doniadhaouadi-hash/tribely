@@ -5,6 +5,10 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  define: {
+    // Shown in feedback reports (FR-008). Vercel sets VERCEL_GIT_COMMIT_SHA at build time.
+    __APP_VERSION__: JSON.stringify((process.env.VERCEL_GIT_COMMIT_SHA ?? "dev").slice(0, 7)),
+  },
   server: {
     host: "::",
     port: 8080,
